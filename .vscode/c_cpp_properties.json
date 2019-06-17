@@ -10,9 +10,10 @@
                 "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/variants/mega",
                 "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/variants/micro",
                 "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/libraries/EEPROM/src",
-                "/Users/ocarlott/Documents/Arduino/libraries/Servo/src",
-                "/Users/ocarlott/Documents/Arduino/libraries/Adafruit_Fingerprint_Sensor_Library",
-                "/Users/ocarlott/Documents/Arduino/libraries/Keypad/src",
+                "~/Documents/Arduino/libraries/Servo/src",
+                "~/Documents/Arduino/libraries/Adafruit_Fingerprint_Sensor_Library",
+                "~/Documents/Arduino/libraries/Capacitive_Fingerprint",
+                "~/Documents/Arduino/libraries/Keypad/src",
                 "/Applications/Arduino.app/Contents/Java/libraries/",
                 "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/avr/include"
             ],
