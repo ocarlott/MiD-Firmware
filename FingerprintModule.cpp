@@ -1,27 +1,27 @@
-#include "FingerprintModule.h"
+// #include "FingerprintModule.h"
 
-FingerprintModule::FingerprintModule()
-{
-	pinMode(PIN_FINGERPRINT_RST, OUTPUT);
-	digitalWrite(PIN_FINGERPRINT_RST, LOW);
-	delay(100);
-	digitalWrite(PIN_FINGERPRINT_RST, HIGH);
-	pinMode(PIN_FINGERPRINT_WAKE, INPUT);
-	Finger_SoftwareSerial_Init();
-	Finger_Wait_Until_OK();
-}
+// FingerprintModule::FingerprintModule()
+// {
+// 	pinMode(PIN_FINGERPRINT_RST, OUTPUT);
+// 	digitalWrite(PIN_FINGERPRINT_RST, LOW);
+// 	delay(100);
+// 	digitalWrite(PIN_FINGERPRINT_RST, HIGH);
+// 	pinMode(PIN_FINGERPRINT_WAKE, INPUT);
+// 	Finger_SoftwareSerial_Init();
+// 	Finger_Wait_Until_OK();
+// }
 
-void FingerprintModule::poll()
-{
-	Analysis_PC_Command();
+// void FingerprintModule::poll()
+// {
+// 	Analysis_PC_Command();
 
-	// If in sleep mode, turn on the auto wake-up function of the finger,
-	//begin to check if the finger is pressed, and wake up the module and match it
-	if (Finger_SleepFlag == 1)
-	{
-		Auto_Verify_Finger();
-	}
-}
+// 	// If in sleep mode, turn on the auto wake-up function of the finger,
+// 	//begin to check if the finger is pressed, and wake up the module and match it
+// 	if (Finger_SleepFlag == 1)
+// 	{
+// 		Auto_Verify_Finger();
+// 	}
+// }
 // On Leonardo/Micro or others with hardware serial, use those! #0 is green wire, #1 is white
 // uncomment this line:
 // #define mySerial Serial1

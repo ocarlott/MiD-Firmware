@@ -1,22 +1,23 @@
 #include "Notification.h"
 
-Notification::Notification()
+void Notification::begin()
 {
-	pinMode(PIN_OUTPUT, OUTPUT);
-	Serial.begin(115200);
+	pinMode(PIN_OUTPUT_SUCCESS, OUTPUT);
+	pinMode(PIN_OUTPUT_FAILURE, OUTPUT);
 }
 
 void Notification::alertSuccess()
 {
-	digitalWrite(PIN_OUTPUT, HIGH);
-	Serial.println("Opened!");
-	digitalWrite(PIN_OUTPUT, LOW);
+	Debug::print("Open!");
+	digitalWrite(PIN_OUTPUT_SUCCESS, HIGH);
+	delay(1000);
+	digitalWrite(PIN_OUTPUT_SUCCESS, LOW);
 }
 
 void Notification::alertFailure()
 {
-	Serial.println("Failed!");
-	digitalWrite(LED_BUILTIN, HIGH);
-	delay(3000);
-	digitalWrite(LED_BUILTIN, LOW);
+	Debug::print("Failed!");
+	digitalWrite(PIN_OUTPUT_FAILURE, HIGH);
+	delay(1000);
+	digitalWrite(PIN_OUTPUT_FAILURE, LOW);
 }

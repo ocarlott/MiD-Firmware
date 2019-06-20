@@ -1,16 +1,47 @@
 #include "Debug.h"
 
-extern HardwareSerial Serial;
+bool Debug::_enable = false;
 
-Debug::Debug()
+void Debug::enable()
 {
-}
+	Debug::_enable = true;
+};
 
-void Debug::captureSerialInputData()
+void Debug::disable()
 {
-	if (Serial.available())
+	Debug::_enable = false;
+};
+
+void Debug::print(char *str, char *ending = "\n")
+{
+	if (Debug::_enable)
 	{
-		Serial.write(Serial.read()); //send what has been received
-		Serial.println();			 //print line feed character
+		Serial.print(str);
+		Serial.print(ending);
 	}
-}
+};
+
+void Debug::print(char c, char *ending = "\n")
+{
+	if (Debug::_enable)
+	{
+		Serial.print(c);
+		Serial.print(ending);
+	}
+};
+void Debug::print(int n, char *ending = "\n")
+{
+	if (Debug::_enable)
+	{
+		Serial.print(n);
+		Serial.print(ending);
+	}
+};
+void Debug::print(byte n, char *ending = "\n")
+{
+	if (Debug::_enable)
+	{
+		Serial.print(n);
+		Serial.print(ending);
+	}
+};

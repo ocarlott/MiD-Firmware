@@ -5,19 +5,10 @@
 #include "Storage.h"
 #include "Lock.h"
 #include <Keypad.h>
-
-struct KeyCode
-{
-	int id;
-	int code;
-};
-
-struct KeyCodeManager
-{
-	int numberOfKeyCodes;
-	int id;
-	struct KeyCode codes[PASSCODE_MAX_COUNT];
-};
+#include <Wire.h>
+#include "Notification.h"
+#include <Keypad_MC17.h>
+#include "Type.h"
 
 class KeypadModule
 {
@@ -26,15 +17,18 @@ class KeypadModule
 	int lastTime;
 	int currentIndex;
 	bool enabled;
-	class Keypad keypad;
+	class Keypad_MC17 keypad;
 	class Storage *storage;
 	class Lock *lock;
+	class Notification *notifier;
+	bool startCapturing;
 	char passcode[PASSCODE_LENGTH];
 
   public:
-	KeypadModule(class Storage *s, class Lock *l);
+	KeypadModule(class Storage *s, class Lock *l, class Notification *n);
 	void setup(void (*handler)(char));
-	void handleKey(KeypadEvent key);
+	void handleKey(char key);
+	void begin();
 	void enable();
 	void disable();
 	int getComputedPasscode();

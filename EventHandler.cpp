@@ -1,11 +1,13 @@
 #include "EventHandler.h"
 
+class KeypadModule *EventHandler::kpm;
+
 void EventHandler::setup(class KeypadModule *k)
 {
-	EventHandler::kpm = k;
+	kpm = k;
 }
 
 void EventHandler::keypadEventHandler(KeypadEvent key)
 {
-	EventHandler::kpm->handleKey(key);
+	kpm->handleKey(key);
 }

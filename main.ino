@@ -1,28 +1,26 @@
 #include <Arduino.h>
 #include <Adafruit_Fingerprint.h>
 #include <avr/sleep.h>
+#include "Notification.h"
 #include "KeypadModule.h"
 #include "EventHandler.h"
 #include "Constant.h"
 #include "MotorModule.h"
+#include "Storage.h"
 #include "Debug.h"
-
-enum Status
-{
-	Success,
-	Failure,
-	Waiting,
-	Error
-};
 
 Storage storage;
 Notification notifier;
 MotorModule motorModule;
 Lock lock(&notifier, &motorModule);
-KeypadModule kpm(&storage, &lock);
+KeypadModule kpm(&storage, &lock, &notifier);
 
 void setup()
 {
+	Serial.begin(SERIAL_FREQ);
+	Debug::enable();
+	notifier.begin();
+	kpm.begin();
 	EventHandler::setup(&kpm);
 	kpm.setup(EventHandler::keypadEventHandler);
 }

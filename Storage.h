@@ -1,8 +1,9 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
-#include "KeypadModule.h"
+#include "Type.h"
 #include "EEPROM.h"
+#include "Constant.h"
 
 class Storage
 {

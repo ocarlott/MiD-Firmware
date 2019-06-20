@@ -3,12 +3,13 @@
 
 #include <Arduino.h>
 #include "Constant.h"
+#include "Debug.h"
 
 class Notification
 {
   private:
   public:
-	Notification();
+	void begin();
 	void alertSuccess();
 	void alertFailure();
 };
