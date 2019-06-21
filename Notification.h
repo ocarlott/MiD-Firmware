@@ -9,9 +9,11 @@ class Notification
 {
   private:
   public:
-	void begin();
-	void alertSuccess();
-	void alertFailure();
+	uint8_t setup();
+	uint8_t alertSuccess();
+	uint8_t alertFailure();
+	uint8_t alertWarning(char *msg);
+	uint8_t alertNextStep(char *msg);
 };
 
 #endif

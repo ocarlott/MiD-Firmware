@@ -1,15 +1,19 @@
 #ifndef CONSTANT_H
 #define CONSTANT_H
 
-const int PASSCODE_MAX_COUNT = 10;
-const int PASSCODE_LENGTH = 5;
-const int MAX_DELAY_TIME_BETWEEN_KEYS = 2000;
-const int BLUETOOH_PASSCODE_LENGTH = 5;
-const int ROWS = 4;
-const int COLS = 3;
-const int STARTED_VALUE = 9876;
-const int MCP_ADDR = 0x20;
-const int SERIAL_FREQ = 9600;
+#define PASSCODE_MAX_COUNT 10
+#define PASSCODE_LENGTH 5
+#define MAX_DELAY_TIME_BETWEEN_KEYS 2000
+#define BLUETOOH_PASSCODE_LENGTH 5
+#define ROWS 4
+#define COLS 3
+#define STARTED_VALUE 9876
+#define MCP_ADDR 0x20
+#define SERIAL_FREQ 9600
+#define FINGERPRINT_MAX_COUNT 10
+#define COUNT_FOR_ORIENTATION_READING 100 // Accelerometer read with freq of 1.56Hz, so 100 times as slow will be ~ 64s
+#define WAIT_TIME_FOR_FIRST_FINGERPRINT 1500
+#define WAIT_TIME_FOR_SECOND_FINGERPRINT 10000
 
 enum Pin
 {
@@ -22,17 +26,22 @@ enum Pin
 	PIN_KEYPAD_COL_3 = 10, // Pin 3 on Keypad
 	PIN_OUTPUT_SUCCESS = 2,
 	PIN_OUTPUT_FAILURE = 3,
-	PIN_MOTOR = 27,
-	PIN_FINGERPRINT_RST = 9,
+	PIN_MOTOR = 5,
+	// PIN_FINGERPRINT_RST = 9,
+	// PIN_FINGERPRINT_WAKE = 8, // These two are for capacitive
+	PIN_FINGERPRINT_GREEN = 10,
+	PIN_FINGERPRINT_WHITE = 11,
+	PIN_FINGERPRINT_POWER = 7,
 	PIN_FINGERPRINT_WAKE = 8
 };
 
-enum Status
+enum STATUS
 {
-	Success,
-	Failure,
-	Waiting,
-	Error
+	SUCCESS = 0,
+	FULL = -1,
+	INVALID_ID = -2,
+	FAILED = -3,
+	NO_MATCH = -4
 };
 
 #endif

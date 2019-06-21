@@ -3,17 +3,16 @@
 
 #include "Constant.h"
 
-struct KeyCode
-{
-	int id;
-	int code;
-};
-
 struct KeyCodeManager
 {
-	int numberOfKeyCodes;
-	int id;
-	struct KeyCode codes[PASSCODE_MAX_COUNT];
+	uint8_t numberOfKeyCodes;
+	uint32_t codes[PASSCODE_MAX_COUNT];
+};
+
+struct FingerprintManager
+{
+	uint8_t numberOfFingerprints;
+	uint32_t ids[FINGERPRINT_MAX_COUNT];
 };
 
 #endif

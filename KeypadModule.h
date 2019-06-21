@@ -14,8 +14,8 @@ class KeypadModule
 {
 
   private:
-	int lastTime;
-	int currentIndex;
+	unsigned long lastTime;
+	unsigned long currentIndex;
 	bool enabled;
 	class Keypad_MC17 keypad;
 	class Storage *storage;
@@ -26,13 +26,13 @@ class KeypadModule
 
   public:
 	KeypadModule(class Storage *s, class Lock *l, class Notification *n);
-	void setup(void (*handler)(char));
-	void handleKey(char key);
-	void begin();
-	void enable();
-	void disable();
-	int getComputedPasscode();
-	void getKey();
+	uint8_t setup(void (*handler)(char));
+	uint8_t handleKey(char key);
+	uint8_t begin();
+	uint8_t enable();
+	uint8_t disable();
+	uint8_t getComputedPasscode(uint32_t *passcode);
+	uint8_t getKey();
 };
 
 #endif

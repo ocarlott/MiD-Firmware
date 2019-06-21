@@ -2,83 +2,110 @@
 
 Storage::Storage()
 {
-	EEPROM.get(0, this->flag);
-	this->blueCodeAddr = sizeof(int);
-	this->keyCodeAddr = sizeof(int) + sizeof(this->blueCode);
+	this->flagAddr = 0;
+	this->blueCodeAddr = sizeof(this->flag) + this->flagAddr;
+	this->keyCodeAddr = this->blueCodeAddr + sizeof(this->blueCode);
+	this->fingerIdAddr = this->keyCodeAddr + sizeof(this->kcm);
+}
+
+uint8_t Storage::setup()
+{
+	Debug::print("Start flag is at address: ", "");
+	Debug::print(this->flagAddr);
+	Debug::print("Bluetooth passcode is at address: ", "");
+	Debug::print(this->blueCodeAddr);
+	Debug::print("Keypad passcodes are at address: ", "");
+	Debug::print(this->keyCodeAddr);
+	Debug::print("Fingerprint Ids are at address: ", "");
+	Debug::print(this->fingerIdAddr);
+	EEPROM.get(this->flagAddr, this->flag);
 	if (this->flag == STARTED_VALUE)
 	{
 		EEPROM.get(this->blueCodeAddr, this->blueCode);
 		EEPROM.get(this->keyCodeAddr, this->kcm);
+		EEPROM.get(this->fingerIdAddr, this->fpm);
 	}
 	else
 	{
 		this->kcm.numberOfKeyCodes = 0;
-		this->kcm.id = 0;
 		this->addKeyCode(12345);
 		this->blueCode = 12345;
-		for (int i = 1; i < PASSCODE_MAX_COUNT; i++)
+		this->fpm.numberOfFingerprints = 0;
+		for (uint8_t i = 1; i < PASSCODE_MAX_COUNT; i++)
 		{
-			this->kcm.codes[i] = {-1, -1};
+			this->kcm.codes[i] = -1;
+		}
+		for (uint8_t i = i; i < FINGERPRINT_MAX_COUNT; i++)
+		{
+			this->fpm.ids[i] = -1;
 		}
 		this->flag = STARTED_VALUE;
+		this->save();
 	}
+	return SUCCESS;
 }
 
-int Storage::getBlueCode()
+uint8_t Storage::getBlueCode(uint32_t *returnValue)
 {
-	return this->blueCode;
+	*returnValue = this->blueCode;
+	return SUCCESS;
 }
 
-struct KeyCode Storage::getPasscode(int index)
+uint8_t Storage::getPasscode(uint8_t id, uint32_t *passcode)
 {
-	if (index <= this->kcm.numberOfKeyCodes - 1 && index >= 0)
+	if (id <= PASSCODE_MAX_COUNT && id > 0)
 	{
-		return this->kcm.codes[index];
+		*passcode = this->kcm.codes[id - 1];
+		return SUCCESS;
 	}
-	return {-1, -1};
+	return INVALID_ID;
 }
 
-void Storage::save()
+uint8_t Storage::save()
 {
+	EEPROM.put(this->flagAddr, this->flag);
 	EEPROM.put(this->blueCodeAddr, this->blueCode);
 	EEPROM.put(this->keyCodeAddr, this->kcm);
-	EEPROM.put(0, this->flag);
+	EEPROM.put(this->fingerIdAddr, this->fpm);
+	Debug::print("Saved data in Storage class!");
+	return SUCCESS;
 }
 
-void Storage::setBlueCode(int blueCode)
+uint8_t Storage::setBlueCode(uint32_t blueCode)
 {
 	this->blueCode = blueCode;
+	return SUCCESS;
 }
 
-void Storage::addKeyCode(int keyCode)
+uint8_t Storage::addKeyCode(uint32_t keyCode, uint8_t *returnId)
 {
-	struct KeyCode codeStruct;
-	codeStruct.code = keyCode;
-	codeStruct.id = this->kcm.id++;
-	this->kcm.codes[this->kcm.numberOfKeyCodes++] = codeStruct;
-}
-
-void Storage::removeKeyCode(int id)
-{
-	for (int i = 0; i < this->kcm.numberOfKeyCodes; i++)
+	for (uint8_t i = 0; i < PASSCODE_MAX_COUNT; i++)
 	{
-		if (this->kcm.codes[i].id == id)
+		if (this->kcm.codes[i] == -1)
 		{
-			for (int j = i; j < this->kcm.numberOfKeyCodes - 1; j++)
-			{
-				this->kcm.codes[j] = this->kcm.codes[j + 1];
-			}
-			break;
+			this->kcm.codes[i] = keyCode;
+			*returnId = i;
+			return SUCCESS;
 		}
 	}
+	return FULL;
 }
 
-bool Storage::checkPasscode(int passcode)
+uint8_t Storage::removeKeyCode(uint8_t id)
 {
-	int keyCount = this->kcm.numberOfKeyCodes;
-	for (int i = 0; i < keyCount; i++)
+	if (id > 0 && id <= PASSCODE_MAX_COUNT)
 	{
-		if (this->kcm.codes[i].code == passcode)
+		this->kcm.codes[id - 1] = -1;
+		return SUCCESS;
+	}
+	return INVALID_ID;
+}
+
+bool Storage::checkPasscode(uint32_t passcode)
+{
+	for (uint8_t i = 0; i < PASSCODE_MAX_COUNT; i++)
+	{
+		if (this->kcm.codes[i] == passcode)
 		{
 			return true;
 		}
@@ -86,6 +113,41 @@ bool Storage::checkPasscode(int passcode)
 	return false;
 }
 
-void Storage::clearStorage()
+uint8_t Storage::clearStorage()
 {
+	this->flag = 0;
+	EEPROM.put(this->flagAddr, this->flag);
+	return SUCCESS;
+}
+
+uint8_t Storage::getNextIdForFingerprint(uint8_t *id)
+{
+	uint8_t count = this->fpm.numberOfFingerprints;
+	if (count == 0)
+	{
+		*id = 1;
+		return SUCCESS;
+	}
+	else
+	{
+		for (uint8_t i = 0; i < FINGERPRINT_MAX_COUNT; i++)
+		{
+			if (this->fpm.ids[i] == -1)
+			{
+				*id = i + 1;
+				return SUCCESS;
+			}
+		}
+		return FULL;
+	}
+}
+
+uint8_t Storage::deleteFingerprintId(uint8_t id)
+{
+	if (id > 0 && id <= FINGERPRINT_MAX_COUNT)
+	{
+		this->fpm.ids[id] = -1;
+		return SUCCESS;
+	}
+	return INVALID_ID;
 }

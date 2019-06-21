@@ -22,34 +22,38 @@ KeypadModule::KeypadModule(class Storage *s, class Lock *l, class Notification *
 	this->startCapturing = false;
 }
 
-void KeypadModule::setup(void (*handler)(char))
+uint8_t KeypadModule::setup(void (*handler)(char))
 {
 	this->keypad.addEventListener(handler);
+	return SUCCESS;
 }
 
-void KeypadModule::begin()
+uint8_t KeypadModule::begin()
 {
 	this->keypad.begin();
+	return SUCCESS;
 }
 
-void KeypadModule::enable()
+uint8_t KeypadModule::enable()
 {
 	this->enabled = true;
+	return SUCCESS;
 }
 
-void KeypadModule::disable()
+uint8_t KeypadModule::disable()
 {
 	this->enabled = false;
+	return SUCCESS;
 }
 
-void KeypadModule::handleKey(char key)
+uint8_t KeypadModule::handleKey(char key)
 {
 	if (this->enabled)
 	{
 		if (this->keypad.getState() == PRESSED)
 		{
 			Debug::print(key, "\t");
-			int currentTime = millis();
+			unsigned long currentTime = millis();
 			switch (key)
 			{
 			case '*':
@@ -61,7 +65,7 @@ void KeypadModule::handleKey(char key)
 				{
 					if (this->currentIndex == PASSCODE_LENGTH)
 					{
-						int passcode = this->getComputedPasscode();
+						uint32_t passcode = this->getComputedPasscode();
 						this->currentIndex = 0;
 						this->lock->openIfTrue(this->storage->checkPasscode(passcode));
 					}
@@ -99,17 +103,19 @@ void KeypadModule::handleKey(char key)
 	}
 }
 
-int KeypadModule::getComputedPasscode()
+uint8_t KeypadModule::getComputedPasscode(uint32_t *passcode)
 {
-	int result = 0;
-	for (int i = 0; i < PASSCODE_LENGTH; i++)
+	uint32_t result = 0;
+	for (uint8_t i = 0; i < PASSCODE_LENGTH; i++)
 	{
 		result = result * 10 + this->passcode[i] - 48;
 	}
-	return result;
+	*passcode = result;
+	return SUCCESS;
 }
 
-void KeypadModule::getKey()
+uint8_t KeypadModule::getKey()
 {
 	char key = this->keypad.getKey();
+	return SUCCESS;
 }

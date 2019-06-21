@@ -9,10 +9,12 @@ class Lock
   private:
 	class Notification *notifier;
 	class MotorModule *motorModule;
+	bool isLocked;
 
   public:
 	Lock(class Notification *n, class MotorModule *m);
 	void openIfTrue(bool condition);
+	bool isOpened();
 };
 
 #endif

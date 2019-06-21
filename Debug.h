@@ -7,7 +7,7 @@
 class Debug
 {
   private:
-	static bool _enable;
+	static bool enabled;
 
   public:
 	static void enable();

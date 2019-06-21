@@ -1,20 +1,20 @@
 #include "Debug.h"
 
-bool Debug::_enable = false;
+bool Debug::enabled = false;
 
 void Debug::enable()
 {
-	Debug::_enable = true;
+	Debug::enabled = true;
 };
 
 void Debug::disable()
 {
-	Debug::_enable = false;
+	Debug::enabled = false;
 };
 
 void Debug::print(char *str, char *ending = "\n")
 {
-	if (Debug::_enable)
+	if (Debug::enabled)
 	{
 		Serial.print(str);
 		Serial.print(ending);
@@ -23,7 +23,7 @@ void Debug::print(char *str, char *ending = "\n")
 
 void Debug::print(char c, char *ending = "\n")
 {
-	if (Debug::_enable)
+	if (Debug::enabled)
 	{
 		Serial.print(c);
 		Serial.print(ending);
@@ -31,7 +31,7 @@ void Debug::print(char c, char *ending = "\n")
 };
 void Debug::print(int n, char *ending = "\n")
 {
-	if (Debug::_enable)
+	if (Debug::enabled)
 	{
 		Serial.print(n);
 		Serial.print(ending);
@@ -39,7 +39,7 @@ void Debug::print(int n, char *ending = "\n")
 };
 void Debug::print(byte n, char *ending = "\n")
 {
-	if (Debug::_enable)
+	if (Debug::enabled)
 	{
 		Serial.print(n);
 		Serial.print(ending);
