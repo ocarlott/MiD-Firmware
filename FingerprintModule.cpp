@@ -143,9 +143,11 @@
 //}
 
 // Optical Fingerprint section
+volatile bool FingerprintModule::ready;
+
 FingerprintModule::FingerprintModule(class Storage *s, class Notification *n, class Lock *l) : storage(s), notifier(n), lock(l)
 {
-	this->ready = false;
+	FingerprintModule::ready = false;
 	this->enrollmentRequested = false;
 	this->waitTimeForCheckingFingerprint = 2000;
 	SoftwareSerial conn(PIN_FINGERPRINT_GREEN, PIN_FINGERPRINT_WHITE);
@@ -154,14 +156,14 @@ FingerprintModule::FingerprintModule(class Storage *s, class Notification *n, cl
 
 void FingerprintModule::isr()
 {
-	this->ready = true;
+	FingerprintModule::ready = true;
 }
 
 uint8_t FingerprintModule::setup()
 {
 	pinMode(PIN_FINGERPRINT_POWER, OUTPUT);
 	pinMode(PIN_FINGERPRINT_WAKE, INPUT);
-	attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), this->isr, HIGH);
+	attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), FingerprintModule::isr, HIGH);
 }
 
 uint8_t FingerprintModule::run()
@@ -184,6 +186,7 @@ uint8_t FingerprintModule::run()
 	}
 	else
 	{
+		this->notifier->alertFailure();
 		Debug::print("Failed to open with fingerprint sensor!");
 	}
 
@@ -192,7 +195,7 @@ uint8_t FingerprintModule::run()
 
 bool FingerprintModule::isReady()
 {
-	return this->ready;
+	return FingerprintModule::ready;
 }
 
 uint8_t FingerprintModule::addFingerprint()
@@ -230,7 +233,7 @@ uint8_t FingerprintModule::start()
 uint8_t FingerprintModule::stop()
 {
 	digitalWrite(PIN_FINGERPRINT_POWER, LOW);
-	attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), this->isr, HIGH);
+	attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), FingerprintModule::isr, HIGH);
 	return SUCCESS;
 }
 
@@ -375,7 +378,7 @@ uint8_t FingerprintModule::storeModel(uint8_t id)
 
 uint8_t FingerprintModule::enroll(uint8_t *returnId)
 {
-	if (!this->ready)
+	if (!FingerprintModule::ready)
 	{
 		return FAILED;
 	}

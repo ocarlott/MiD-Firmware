@@ -65,7 +65,8 @@ uint8_t KeypadModule::handleKey(char key)
 				{
 					if (this->currentIndex == PASSCODE_LENGTH)
 					{
-						uint32_t passcode = this->getComputedPasscode();
+						uint32_t passcode;
+						this->getComputedPasscode(&passcode);
 						this->currentIndex = 0;
 						this->lock->openIfTrue(this->storage->checkPasscode(passcode));
 					}

@@ -25,10 +25,10 @@ class FingerprintModule
 	class Storage *storage;
 	class Lock *lock;
 	class Notification *notifier;
-	volatile bool ready;
+	static volatile bool ready;
 	bool enrollmentRequested;
 	uint16_t waitTimeForCheckingFingerprint;
-	void isr();
+	static void isr();
 	uint8_t start();
 	uint8_t stop();
 	uint8_t enroll(uint8_t *id);

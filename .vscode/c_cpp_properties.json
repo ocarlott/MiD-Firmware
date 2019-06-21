@@ -8,17 +8,7 @@
 				"/Applications/Arduino.app/Contents/Java/tools/**",
 				"/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/**",
 				"${workspaceFolder}/**",
-				"/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino",
-				"/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/variants/mega",
-				"/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/variants/micro",
-				"/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/libraries/EEPROM/src",
-				"~/Documents/Arduino/libraries/Adafruit_Fingerprint_Sensor_Library",
-				"~/Documents/Arduino/libraries/Capacitive_Fingerprint",
-				"~/Documents/Arduino/libraries/Keypad/src",
-				"~/Documents/Arduino/libraries/Adafruit_MCP23017_Arduino_Library",
-				"~/Documents/Arduino/libraries/Keypad_MC17",
-				"~/Documents/Arduino/libraries/Adafruit_MMA8451",
-				"/Applications/Arduino.app/Contents/Java/libraries/",
+				"${workspaceFolder}/libraries",
 				"/Applications/Arduino.app/Contents/Java/hardware/tools/avr/avr/include"
 			],
 			"macFrameworkPath": [

@@ -29,6 +29,7 @@ void Debug::print(char c, char *ending = "\n")
 		Serial.print(ending);
 	}
 };
+
 void Debug::print(int n, char *ending = "\n")
 {
 	if (Debug::enabled)
@@ -37,7 +38,26 @@ void Debug::print(int n, char *ending = "\n")
 		Serial.print(ending);
 	}
 };
-void Debug::print(byte n, char *ending = "\n")
+
+void Debug::print(uint8_t n, char *ending = "\n")
+{
+	if (Debug::enabled)
+	{
+		Serial.print(n);
+		Serial.print(ending);
+	}
+};
+
+void Debug::print(uint16_t n, char *ending = "\n")
+{
+	if (Debug::enabled)
+	{
+		Serial.print(n);
+		Serial.print(ending);
+	}
+};
+
+void Debug::print(uint32_t n, char *ending = "\n")
 {
 	if (Debug::enabled)
 	{
