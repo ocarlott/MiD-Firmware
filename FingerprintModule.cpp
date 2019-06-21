@@ -143,7 +143,7 @@
 //}
 
 // Optical Fingerprint section
-FingerprintModule::FingerprintModule(class Storage *s, class Notification *n) : storage(s), notifier(n)
+FingerprintModule::FingerprintModule(class Storage *s, class Notification *n, class Lock *l) : storage(s), notifier(n), lock(l)
 {
 	this->ready = false;
 	this->enrollmentRequested = false;
@@ -178,9 +178,15 @@ uint8_t FingerprintModule::run()
 	}
 	if (status == SUCCESS)
 	{
-		// Do something with ID
+		this->notifier->alertSuccess();
+		this->lock->openIfTrue(true);
 		return SUCCESS;
 	}
+	else
+	{
+		Debug::print("Failed to open with fingerprint sensor!");
+	}
+
 	return FAILED;
 }
 

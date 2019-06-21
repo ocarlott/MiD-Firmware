@@ -16,7 +16,7 @@ MotorModule motorModule;
 Lock lock(&notifier, &motorModule);
 KeypadModule kpm(&storage, &lock, &notifier);
 AccelerometerModule am(&notifier);
-FingerprintModule fpm(&storage, &notifier);
+FingerprintModule fpm(&storage, &notifier, &lock);
 
 void setup()
 {
