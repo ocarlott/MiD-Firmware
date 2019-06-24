@@ -12,7 +12,7 @@ struct KeyCodeManager
 struct FingerprintManager
 {
 	uint8_t numberOfFingerprints;
-	uint32_t ids[FINGERPRINT_MAX_COUNT];
+	uint8_t ids[FINGERPRINT_MAX_COUNT];
 };
 
 #endif

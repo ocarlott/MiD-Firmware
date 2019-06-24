@@ -1,6 +1,7 @@
 {
     "programmer": "AVRISP mkII",
-    "board": "arduino:avr:uno",
-    "port": "/dev/cu.usbmodem14201",
-    "sketch": "main.ino"
+    "board": "adafruit:nrf52:feather52832",
+    "port": "/dev/cu.SLAB_USBtoUART",
+    "sketch": "main.ino",
+    "configuration": "softdevice=s132v6,debug=l2"
 }

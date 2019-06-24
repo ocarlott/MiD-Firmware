@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "Type.h"
-#include "EEPROM.h"
 #include "Constant.h"
 #include "Debug.h"
 
@@ -32,6 +31,7 @@ class Storage
 	uint8_t clearStorage();
 	uint8_t getNextIdForFingerprint(uint8_t *id);
 	uint8_t deleteFingerprintId(uint8_t id);
+	uint8_t addFingerprintWithId(uint8_t id);
 };
 
 #endif

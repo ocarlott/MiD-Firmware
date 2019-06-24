@@ -14,7 +14,7 @@ Keypad_MC17 makeKeyPadObject()
 	return Keypad_MC17(makeKeymap(keys), rowPins, colPins, ROWS, COLS, MCP_ADDR);
 }
 
-KeypadModule::KeypadModule(class Storage *s, class Lock *l, class Notification *n) : keypad(makeKeyPadObject()), storage(s), lock(l), notifier(n)
+KeypadModule::KeypadModule(class Storage *s, class Lock *l) : keypad(makeKeyPadObject()), storage(s), lock(l)
 {
 	this->lastTime = millis();
 	this->currentIndex = 0;
@@ -25,6 +25,7 @@ KeypadModule::KeypadModule(class Storage *s, class Lock *l, class Notification *
 uint8_t KeypadModule::setup(void (*handler)(char))
 {
 	this->keypad.addEventListener(handler);
+  DEBUG.println("Finished setting up Keypad Module.");
 	return SUCCESS;
 }
 
@@ -52,7 +53,7 @@ uint8_t KeypadModule::handleKey(char key)
 	{
 		if (this->keypad.getState() == PRESSED)
 		{
-			Debug::print(key, "\t");
+			DEBUG.print("Current key: ", key);
 			unsigned long currentTime = millis();
 			switch (key)
 			{
@@ -72,7 +73,7 @@ uint8_t KeypadModule::handleKey(char key)
 					}
 					else
 					{
-						this->notifier->alertFailure();
+						NOTIFIER.alertFailure();
 					}
 					this->startCapturing = false;
 				}
@@ -88,7 +89,7 @@ uint8_t KeypadModule::handleKey(char key)
 						}
 						else
 						{
-							this->notifier->alertFailure();
+							NOTIFIER.alertFailure();
 							this->startCapturing = false;
 						}
 					}
@@ -117,6 +118,6 @@ uint8_t KeypadModule::getComputedPasscode(uint32_t *passcode)
 
 uint8_t KeypadModule::getKey()
 {
-	char key = this->keypad.getKey();
+	this->keypad.getKey();
 	return SUCCESS;
 }

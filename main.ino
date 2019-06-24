@@ -1,34 +1,37 @@
+#define NRF32
 #include <Arduino.h>
-#include <avr/sleep.h>
+#include "Debug.h"
 #include "Notification.h"
 #include "KeypadModule.h"
-#include "EventHandler.h"
 #include "Constant.h"
 #include "MotorModule.h"
 #include "AccelerometerModule.h"
 #include "FingerprintModule.h"
 #include "Storage.h"
-#include "Debug.h"
 
 Storage storage;
-Notification notifier;
 MotorModule motorModule;
-Lock lock(&notifier, &motorModule);
-KeypadModule kpm(&storage, &lock, &notifier);
-AccelerometerModule am(&notifier);
-FingerprintModule fpm(&storage, &notifier, &lock);
+Lock lock(&motorModule);
+KeypadModule kpm(&storage, &lock);
+AccelerometerModule am;
+FingerprintModule fpm(&storage, &lock);
+
+void keypadEventHandler(KeypadEvent key)
+{
+	kpm.handleKey(key);
+};
 
 void setup()
 {
 	Serial.begin(SERIAL_FREQ);
-	Debug::enable();
-	notifier.setup();
+  Serial.println("Start setting up.");
+	DEBUG.enable();
+	NOTIFIER.setup();
 	motorModule.setup();
 	am.setup();
 	fpm.setup();
 	kpm.begin();
-	EventHandler::setup(&kpm);
-	kpm.setup(EventHandler::keypadEventHandler);
+	kpm.setup(keypadEventHandler);
 }
 
 void loop()
@@ -36,6 +39,7 @@ void loop()
 	//  sleep_enable();
 	//  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 	//  sleep_cpu();
+  Serial.print("Test.");
 	if (lock.isOpened())
 	{
 	}
@@ -47,6 +51,6 @@ void loop()
 		{
 			fpm.run();
 		}
-		Debug::print("Loop ended!");
+		DEBUG.println("Loop ended!");
 	}
 }

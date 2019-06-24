@@ -1,5 +1,4 @@
 #include "FingerprintModule.h"
-
 // FingerprintModule::FingerprintModule()
 // {
 // 	pinMode(PIN_FINGERPRINT_RST, OUTPUT);
@@ -22,136 +21,17 @@
 // 		Auto_Verify_Finger();
 // 	}
 // }
-// On Leonardo/Micro or others with hardware serial, use those! #0 is green wire, #1 is white
-// uncomment this line:
-// #define mySerial Serial1
-
-// comment these two lines if using hardware serial
-//SoftwareSerial mySerial(2, 3);
-//
-//Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
-//// RX is white and should be connected to TX on board, TX is green
-//void setup()
-//{
-//  Serial.begin(9600);
-//  while (!Serial);  // For Yun/Leo/Micro/Zero/...
-//  delay(100);
-//  Debug::print("\n\nAdafruit finger detect test");
-//
-//  // set the data rate for the sensor serial port
-//  this->reader.begin(57600);
-//
-//  if (this->reader.verifyPassword()) {
-//    Debug::print("Found fingerprint sensor!");
-//  } else {
-//    Debug::print("Did not find fingerprint sensor :(");
-//    while (1) { delay(1); }
-//  }
-//
-//  this->reader.getTemplateCount();
-//  Serial.print("Sensor contains "); Serial.print(this->reader.templateCount); Debug::print(" templates");
-//  Debug::print("Waiting for valid this->reader...");
-//}
-//
-//void loop()                     // run over and over again
-//{
-//  getFingerprintIDez();
-//  delay(50);            //don't ned to run this at full speed.
-//}
-//
-//uint8_t getFingerprintID() {
-//  uint8_t p = this->reader.getImage();
-//  switch (p) {
-//    case FINGERPRINT_OK:
-//      Debug::print("Image taken");
-//      break;
-//    case FINGERPRINT_NOFINGER:
-//      Debug::print("No finger detected");
-//      return p;
-//    case FINGERPRINT_PACKETRECIEVEERR:
-//      Debug::print("Communication error");
-//      return p;
-//    case FINGERPRINT_IMAGEFAIL:
-//      Debug::print("Imaging error");
-//      return p;
-//    default:
-//      Debug::print("Unknown error");
-//      return p;
-//  }
-//
-//  // OK success!
-//
-//  p = this->reader.image2Tz();
-//  switch (p) {
-//    case FINGERPRINT_OK:
-//      Debug::print("Image converted");
-//      break;
-//    case FINGERPRINT_IMAGEMESS:
-//      Debug::print("Image too messy");
-//      return p;
-//    case FINGERPRINT_PACKETRECIEVEERR:
-//      Debug::print("Communication error");
-//      return p;
-//    case FINGERPRINT_FEATUREFAIL:
-//      Debug::print("Could not find fingerprint features");
-//      return p;
-//    case FINGERPRINT_INVALIDIMAGE:
-//      Debug::print("Could not find fingerprint features");
-//      return p;
-//    default:
-//      Debug::print("Unknown error");
-//      return p;
-//  }
-//
-//  // OK converted!
-//  p = this->reader.fingerFastSearch();
-//  if (p == FINGERPRINT_OK) {
-//    Debug::print("Found a print match!");
-//  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
-//    Debug::print("Communication error");
-//    return p;
-//  } else if (p == FINGERPRINT_NOTFOUND) {
-//    Debug::print("Did not find a match");
-//    return p;
-//  } else {
-//    Debug::print("Unknown error");
-//    return p;
-//  }
-//
-//  // found a match!
-//  Serial.print("Found ID #"); Serial.print(this->reader.fingerID);
-//  Serial.print(" with confidence of "); Debug::print(this->reader.confidence);
-//
-//  return this->reader.fingerID;
-//}
-//
-//// returns -1 if failed, otherwise returns ID #
-//int getFingerprintIDez() {
-//  uint8_t p = this->reader.getImage();
-//  if (p != FINGERPRINT_OK)  return -1;
-//
-//  p = this->reader.image2Tz();
-//  if (p != FINGERPRINT_OK)  return -1;
-//
-//  p = this->reader.fingerFastSearch();
-//  if (p != FINGERPRINT_OK)  return -1;
-//
-//  // found a match!
-//  Serial.print("Found ID #"); Serial.print(this->reader.fingerID);
-//  Serial.print(" with confidence of "); Debug::print(this->reader.confidence);
-//  return this->reader.fingerID;
-//}
 
 // Optical Fingerprint section
 volatile bool FingerprintModule::ready;
 
-FingerprintModule::FingerprintModule(class Storage *s, class Notification *n, class Lock *l) : storage(s), notifier(n), lock(l)
+FingerprintModule::FingerprintModule(class Storage *s, class Lock *l) : storage(s), lock(l)
 {
 	FingerprintModule::ready = false;
 	this->enrollmentRequested = false;
 	this->waitTimeForCheckingFingerprint = 2000;
 	SoftwareSerial conn(PIN_FINGERPRINT_GREEN, PIN_FINGERPRINT_WHITE);
-	this->reader = &Adafruit_Fingerprint(&conn);
+	this->reader = new Adafruit_Fingerprint(&conn);
 }
 
 void FingerprintModule::isr()
@@ -161,15 +41,36 @@ void FingerprintModule::isr()
 
 uint8_t FingerprintModule::setup()
 {
-	pinMode(PIN_FINGERPRINT_POWER, OUTPUT);
 	pinMode(PIN_FINGERPRINT_WAKE, INPUT);
-	attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), FingerprintModule::isr, HIGH);
+	this->reader->begin(57600);
+	uint8_t counter = 5;
+	bool available;
+	do
+	{
+		available = this->reader->verifyPassword();
+		if (available)
+		{
+			DEBUG.println("Found fingerprint sensor!");
+		}
+		else
+		{
+			DEBUG.println("Did not find fingerprint sensor :(");
+		}
+	} while (counter && !available);
+	if (available)
+	{
+		this->reader->ledOff();
+		attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), FingerprintModule::isr, HIGH);
+		return SUCCESS;
+	}
+	return FAILED;
 }
 
 uint8_t FingerprintModule::run()
 {
 	uint8_t id;
 	uint8_t status;
+	this->reader->ledOn();
 	if (this->enrollmentRequested)
 	{
 		status = this->enroll(&id);
@@ -180,16 +81,16 @@ uint8_t FingerprintModule::run()
 	}
 	if (status == SUCCESS)
 	{
-		this->notifier->alertSuccess();
+		NOTIFIER.alertSuccess();
 		this->lock->openIfTrue(true);
 		return SUCCESS;
 	}
 	else
 	{
-		this->notifier->alertFailure();
-		Debug::print("Failed to open with fingerprint sensor!");
+		NOTIFIER.alertFailure();
+		DEBUG.println("Failed to open with fingerprint sensor!");
 	}
-
+	this->reader->ledOff();
 	return FAILED;
 }
 
@@ -207,32 +108,13 @@ uint8_t FingerprintModule::addFingerprint()
 uint8_t FingerprintModule::start()
 {
 	detachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE));
-	this->reader->begin(57600);
-	uint8_t counter = 5;
-	bool available;
-	do
-	{
-		available = this->reader->verifyPassword();
-		if (available)
-		{
-			Debug::print("Found fingerprint sensor!");
-		}
-		else
-		{
-			Debug::print("Did not find fingerprint sensor :(");
-		}
-	} while (counter && !available);
-	if (available)
-	{
-		digitalWrite(PIN_FINGERPRINT_POWER, HIGH);
-		return SUCCESS;
-	}
+	this->reader->ledOn();
 	return FAILED;
 }
 
 uint8_t FingerprintModule::stop()
 {
-	digitalWrite(PIN_FINGERPRINT_POWER, LOW);
+	this->reader->ledOff();
 	attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), FingerprintModule::isr, HIGH);
 	return SUCCESS;
 }
@@ -248,28 +130,28 @@ uint8_t FingerprintModule::getImage(unsigned long waitTime)
 		switch (p)
 		{
 		case FINGERPRINT_OK:
-			Debug::print("Image taken");
+			DEBUG.println("Image taken");
 			break;
 		case FINGERPRINT_NOFINGER:
 			break;
 		case FINGERPRINT_PACKETRECIEVEERR:
 			if (debouncer % 10 == 0)
 			{
-				this->notifier->alertWarning("Communication error");
+				NOTIFIER.alertWarning("Communication error");
 				debouncer = 1;
 			}
 			break;
 		case FINGERPRINT_IMAGEFAIL:
 			if (debouncer % 10 == 0)
 			{
-				this->notifier->alertWarning("Imaging error");
+				NOTIFIER.alertWarning("Imaging error");
 				debouncer = 1;
 			}
 			break;
 		default:
 			if (debouncer % 10 == 0)
 			{
-				this->notifier->alertWarning("Unknown error");
+				NOTIFIER.alertWarning("Unknown error");
 				debouncer = 1;
 			}
 			break;
@@ -290,22 +172,22 @@ uint8_t FingerprintModule::convertImage()
 	switch (p)
 	{
 	case FINGERPRINT_OK:
-		Debug::print("Image converted");
+		DEBUG.println("Image converted");
 		return SUCCESS;
 	case FINGERPRINT_IMAGEMESS:
-		this->notifier->alertWarning("Image too messy");
+		NOTIFIER.alertWarning("Image too messy");
 		return FAILED;
 	case FINGERPRINT_PACKETRECIEVEERR:
-		this->notifier->alertWarning("Communication error");
+		NOTIFIER.alertWarning("Communication error");
 		return FAILED;
 	case FINGERPRINT_FEATUREFAIL:
-		this->notifier->alertWarning("Could not find fingerprint features");
+		NOTIFIER.alertWarning("Could not find fingerprint features");
 		return FAILED;
 	case FINGERPRINT_INVALIDIMAGE:
-		this->notifier->alertWarning("Could not find fingerprint features");
+		NOTIFIER.alertWarning("Could not find fingerprint features");
 		return FAILED;
 	default:
-		this->notifier->alertWarning("Unknown error");
+		NOTIFIER.alertWarning("Unknown error");
 		return FAILED;
 	}
 }
@@ -326,22 +208,22 @@ uint8_t FingerprintModule::createModel()
 	uint8_t p = this->reader->createModel();
 	if (p == FINGERPRINT_OK)
 	{
-		Debug::print("Prints matched! Model created!");
+		DEBUG.println("Prints matched! Model created!");
 		return SUCCESS;
 	}
 	else if (p == FINGERPRINT_PACKETRECIEVEERR)
 	{
-		this->notifier->alertWarning("Communication error");
+		NOTIFIER.alertWarning("Communication error");
 		return FAILED;
 	}
 	else if (p == FINGERPRINT_ENROLLMISMATCH)
 	{
-		this->notifier->alertWarning("Fingerprints did not match");
+		NOTIFIER.alertWarning("Fingerprints did not match");
 		return FAILED;
 	}
 	else
 	{
-		this->notifier->alertWarning("Unknown error");
+		NOTIFIER.alertWarning("Unknown error");
 		return FAILED;
 	}
 }
@@ -351,27 +233,27 @@ uint8_t FingerprintModule::storeModel(uint8_t id)
 	uint8_t p = this->reader->storeModel(id);
 	if (p == FINGERPRINT_OK)
 	{
-		Debug::print("Model stored!");
+		DEBUG.println("Model stored!");
 		return SUCCESS;
 	}
 	else if (p == FINGERPRINT_PACKETRECIEVEERR)
 	{
-		this->notifier->alertWarning("Communication error");
+		NOTIFIER.alertWarning("Communication error");
 		return FAILED;
 	}
 	else if (p == FINGERPRINT_BADLOCATION)
 	{
-		this->notifier->alertWarning("Could not store in that location");
+		NOTIFIER.alertWarning("Could not store in that location");
 		return FAILED;
 	}
 	else if (p == FINGERPRINT_FLASHERR)
 	{
-		this->notifier->alertWarning("Error writing to flash");
+		NOTIFIER.alertWarning("Error writing to flash");
 		return FAILED;
 	}
 	else
 	{
-		this->notifier->alertWarning("Unknown error");
+		NOTIFIER.alertWarning("Unknown error");
 		return FAILED;
 	}
 }
@@ -389,8 +271,7 @@ uint8_t FingerprintModule::enroll(uint8_t *returnId)
 	uint8_t id;
 	if (SUCCESS == this->storage->getNextIdForFingerprint(&id))
 	{
-		Debug::print("Waiting for valid finger to enroll with ID #", "");
-		Debug::print(id);
+		DEBUG.print("Waiting for valid finger to enroll with ID #", id);
 		if (SUCCESS != this->getImage(WAIT_TIME_FOR_FIRST_FINGERPRINT))
 		{
 			return FAILED;
@@ -402,10 +283,10 @@ uint8_t FingerprintModule::enroll(uint8_t *returnId)
 		return FAILED;
 	}
 
-	this->notifier->alertNextStep("Remove finger");
+	NOTIFIER.alertNextStep("Remove finger");
 	// While (input from capacitive touch is not detected);
 	this->waitForFingerRemoved();
-	this->notifier->alertNextStep("Waiting for another image to confirm. Place same finger again!");
+	NOTIFIER.alertNextStep("Waiting for another image to confirm. Place same finger again!");
 	if (SUCCESS != this->getImage(WAIT_TIME_FOR_SECOND_FINGERPRINT))
 	{
 		return FAILED;
@@ -459,29 +340,32 @@ uint8_t FingerprintModule::search(uint8_t *returnId)
 	uint8_t p = this->reader->fingerFastSearch();
 	if (p == FINGERPRINT_OK)
 	{
-		Debug::print("Found a print match!");
+		DEBUG.println("Found a print match!");
 	}
 	else if (p == FINGERPRINT_PACKETRECIEVEERR)
 	{
-		Debug::print("Communication error");
+		DEBUG.println("Communication error");
 		return FAILED;
 	}
 	else if (p == FINGERPRINT_NOTFOUND)
 	{
-		Debug::print("Did not find a match");
+		DEBUG.println("Did not find a match");
 		return FAILED;
 	}
 	else
 	{
-		Debug::print("Unknown error");
+		DEBUG.println("Unknown error");
 		return FAILED;
 	}
 
 	// found a match!
-	Debug::print("Found ID #");
-	Debug::print(this->reader->fingerID, " ");
-	Debug::print("with confidence of ");
-	Debug::print(this->reader->confidence);
+	DEBUG.print("Found ID #", this->reader->fingerID);
+	DEBUG.print("Confidence score: ", this->reader->confidence);
 	*returnId = this->reader->fingerID;
 	return SUCCESS;
+}
+
+FingerprintModule::~FingerprintModule()
+{
+	delete this->reader;
 }

@@ -7,21 +7,22 @@ MotorModule::MotorModule()
 
 uint8_t MotorModule::setup()
 {
+  DEBUG.println("Test.");
 	this->turnTo(0);
-	Debug::print("Finished setting up motor!");
+	DEBUG.println("Finished setting up motor!");
 	return SUCCESS;
 }
 
 uint8_t MotorModule::turnToOpenPosition()
 {
-	Debug::print("Turn motor to opened position!");
+	DEBUG.println("Turn motor to opened position!");
 	this->turnTo(180);
 	return SUCCESS;
 }
 
 uint8_t MotorModule::turnToClosePosition()
 {
-	Debug::print("Turn motor to closed position");
+	DEBUG.println("Turn motor to closed position");
 	this->turnTo(0);
 	return SUCCESS;
 }

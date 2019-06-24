@@ -389,3 +389,12 @@ uint8_t Adafruit_Fingerprint::getStructuredPacket(Adafruit_Fingerprint_Packet *p
 	// Shouldn't get here so...
 	return FINGERPRINT_BADPACKET;
 }
+
+uint8_t Adafruit_Fingerprint::ledOn(void)
+{
+	SEND_CMD_PACKET(FINGERPRINT_LEDON);
+}
+uint8_t Adafruit_Fingerprint::ledOff(void)
+{
+	SEND_CMD_PACKET(FINGERPRINT_LEDOFF);
+}

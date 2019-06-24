@@ -1,6 +1,6 @@
 #include "Lock.h"
 
-Lock::Lock(class Notification *n, class MotorModule *m) : notifier(n), motorModule(m)
+Lock::Lock(class MotorModule *m) : motorModule(m)
 {
 	this->isLocked = true;
 }
@@ -11,11 +11,11 @@ void Lock::openIfTrue(bool condition)
 	{
 		this->motorModule->turnToOpenPosition();
 		this->isLocked = false;
-		this->notifier->alertSuccess();
+		NOTIFIER.alertSuccess();
 	}
 	else
 	{
-		this->notifier->alertFailure();
+		NOTIFIER.alertFailure();
 	}
 }
 

@@ -6,7 +6,6 @@
 #include "Lock.h"
 #include <Keypad.h>
 #include <Wire.h>
-#include "Notification.h"
 #include <Keypad_MC17.h>
 #include "Type.h"
 
@@ -20,12 +19,11 @@ class KeypadModule
 	class Keypad_MC17 keypad;
 	class Storage *storage;
 	class Lock *lock;
-	class Notification *notifier;
 	bool startCapturing;
 	char passcode[PASSCODE_LENGTH];
 
   public:
-	KeypadModule(class Storage *s, class Lock *l, class Notification *n);
+	KeypadModule(class Storage *s, class Lock *l);
 	uint8_t setup(void (*handler)(char));
 	uint8_t handleKey(char key);
 	uint8_t begin();

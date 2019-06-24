@@ -4,20 +4,123 @@
 #include <Arduino.h>
 #include "Constant.h"
 
+#define DEFAULT_DEBUG_VALUE 87
+
 class Debug
 {
   private:
-	static bool enabled;
+	bool enabled = false;
 
   public:
-	static void enable();
-	static void disable();
-	static void print(char *str, char *ending = "\n");
-	static void print(char c, char *ending = "\n");
-	static void print(int n, char *ending = "\n");
-	static void print(uint8_t n, char *ending = "\n");
-	static void print(uint16_t n, char *ending = "\n");
-	static void print(uint32_t n, char *ending = "\n");
+	void enable()
+	{
+		enabled = true;
+	};
+	void disable()
+	{
+		enabled = false;
+	};
+	void print(const char *str, char c = DEFAULT_DEBUG_VALUE, const char *unit = "0")
+	{
+		if (enabled)
+		{
+			Serial.print(str);
+			if (c == DEFAULT_DEBUG_VALUE)
+			{
+				Serial.println("");
+			}
+			else
+			{
+				if (unit[0] != '0')
+				{
+					Serial.print(c);
+					Serial.println(unit);
+				}
+				else
+				{
+					Serial.println(c);
+				}
+			}
+		}
+	};
+	void print(const char *str, uint8_t n = DEFAULT_DEBUG_VALUE, const char *unit = "")
+	{
+		if (enabled)
+		{
+			Serial.print(str);
+			if (n == DEFAULT_DEBUG_VALUE)
+			{
+				Serial.println("");
+			}
+			else
+			{
+				if (unit[0] != '0')
+				{
+					Serial.print(n);
+					Serial.println(unit);
+				}
+				else
+				{
+					Serial.println(n);
+				}
+			}
+		}
+	};
+	void print(const char *str, uint16_t n = DEFAULT_DEBUG_VALUE, const char *unit = "")
+	{
+		if (enabled)
+		{
+			Serial.print(str);
+			if (n == DEFAULT_DEBUG_VALUE)
+			{
+				Serial.println("");
+			}
+			else
+			{
+				if (unit[0] != '0')
+				{
+					Serial.print(n);
+					Serial.println(unit);
+				}
+				else
+				{
+					Serial.println(n);
+				}
+			}
+		}
+	};
+	void print(const char *str, uint32_t n = DEFAULT_DEBUG_VALUE, const char *unit = "")
+	{
+		if (enabled)
+		{
+			Serial.print(str);
+			if (n == DEFAULT_DEBUG_VALUE)
+			{
+				Serial.println("");
+			}
+			else
+			{
+				if (unit[0] != '0')
+				{
+					Serial.print(n);
+					Serial.println(unit);
+				}
+				else
+				{
+					Serial.println(n);
+				}
+			}
+		}
+	};
+	void println(const char *str)
+	{
+		if (enabled)
+		{
+			Serial.println(str);
+		}
+	};
 };
+
+static Debug DEBUG;
 
 #endif
