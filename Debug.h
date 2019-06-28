@@ -14,10 +14,12 @@ class Debug
   public:
 	void enable()
 	{
+    Serial.println("Enabling DEBUG!");
 		enabled = true;
 	};
 	void disable()
 	{
+    Serial.println("Disabling DEBUG!");
 		enabled = false;
 	};
 	void print(const char *str, char c = DEFAULT_DEBUG_VALUE, const char *unit = "0")
@@ -120,7 +122,5 @@ class Debug
 		}
 	};
 };
-
-static Debug DEBUG;
 
 #endif

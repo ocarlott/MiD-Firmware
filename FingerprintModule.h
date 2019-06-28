@@ -6,9 +6,13 @@
 #include <Arduino.h>
 #include "Storage.h"
 #include "Lock.h";
-#include <Adafruit_Fingerprint.h>
+#include "Adafruit_Fingerprint.h"
 #include <SoftwareSerial.h>
+#include "Debug.h"
+#include "Notification.h"
 
+extern Debug DEBUG;
+extern Notification NOTIFIER;
 // class FingerprintModule
 // {
 //   public:

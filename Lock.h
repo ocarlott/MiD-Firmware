@@ -4,6 +4,8 @@
 #include "Notification.h"
 #include "MotorModule.h"
 
+extern Notification NOTIFIER;
+
 class Lock
 {
   private:

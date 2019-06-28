@@ -4,10 +4,13 @@
 #include "Constant.h"
 #include "Storage.h"
 #include "Lock.h"
-#include <Keypad.h>
+#include "Keypad.h"
 #include <Wire.h>
-#include <Keypad_MC17.h>
+#include "Keypad_MC17.h"
 #include "Type.h"
+#include "Debug.h"
+
+extern Debug DEBUG;
 
 class KeypadModule
 {

@@ -4,7 +4,10 @@
 #include <Arduino.h>
 #include "Type.h"
 #include "Constant.h"
+#include "EEPROM.h"
 #include "Debug.h"
+
+extern Debug DEBUG;
 
 class Storage
 {

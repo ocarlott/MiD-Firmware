@@ -30,8 +30,6 @@ FingerprintModule::FingerprintModule(class Storage *s, class Lock *l) : storage(
 	FingerprintModule::ready = false;
 	this->enrollmentRequested = false;
 	this->waitTimeForCheckingFingerprint = 2000;
-	SoftwareSerial conn(PIN_FINGERPRINT_GREEN, PIN_FINGERPRINT_WHITE);
-	this->reader = new Adafruit_Fingerprint(&conn);
 }
 
 void FingerprintModule::isr()
@@ -42,6 +40,8 @@ void FingerprintModule::isr()
 uint8_t FingerprintModule::setup()
 {
 	pinMode(PIN_FINGERPRINT_WAKE, INPUT);
+  SoftwareSerial conn(PIN_FINGERPRINT_GREEN, PIN_FINGERPRINT_WHITE);
+  this->reader = new Adafruit_Fingerprint(&conn);
 	this->reader->begin(57600);
 	uint8_t counter = 5;
 	bool available;

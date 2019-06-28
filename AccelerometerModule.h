@@ -5,6 +5,11 @@
 #include "Constant.h"
 #include "WiredDevice.h"
 #include <Arduino.h>
+#include "Debug.h"
+#include "Notification.h"
+
+extern Debug DEBUG;
+extern Notification NOTIFIER;
 
 class AccelerometerModule : WiredDevice
 {

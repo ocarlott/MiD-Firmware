@@ -9,6 +9,9 @@
 #include "FingerprintModule.h"
 #include "Storage.h"
 
+static Debug DEBUG;
+static Notification NOTIFIER;
+
 Storage storage;
 MotorModule motorModule;
 Lock lock(&motorModule);
@@ -24,14 +27,16 @@ void keypadEventHandler(KeypadEvent key)
 void setup()
 {
 	Serial.begin(SERIAL_FREQ);
-  Serial.println("Start setting up.");
+	Serial.println("Start setting up.");
 	DEBUG.enable();
 	NOTIFIER.setup();
+  storage.setup();
 	motorModule.setup();
 	am.setup();
 	fpm.setup();
 	kpm.begin();
 	kpm.setup(keypadEventHandler);
+  Serial.println("Got here!");
 }
 
 void loop()
@@ -39,7 +44,6 @@ void loop()
 	//  sleep_enable();
 	//  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 	//  sleep_cpu();
-  Serial.print("Test.");
 	if (lock.isOpened())
 	{
 	}
@@ -51,6 +55,6 @@ void loop()
 		{
 			fpm.run();
 		}
-		DEBUG.println("Loop ended!");
+//		DEBUG.println("Loop ended!");
 	}
 }

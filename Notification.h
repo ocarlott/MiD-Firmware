@@ -5,6 +5,8 @@
 #include "Constant.h"
 #include "Debug.h"
 
+extern Debug DEBUG;
+
 class Notification
 {
   private:
@@ -47,7 +49,5 @@ class Notification
   		return SUCCESS;
   	};
 };
-
-static Notification NOTIFIER;
 
 #endif

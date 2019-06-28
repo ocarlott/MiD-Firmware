@@ -1,5 +1,4 @@
 #include "Storage.h"
-#include "EEPROM.h"
 
 Storage::Storage()
 {
@@ -83,6 +82,7 @@ uint8_t Storage::addKeyCode(uint32_t keyCode, uint8_t *returnId)
 			this->kcm.codes[i] = keyCode;
 			this->kcm.numberOfKeyCodes++;
 			*returnId = i;
+      DEBUG.print("This passcode has been added: ", keyCode);
 			return SUCCESS;
 		}
 	}
@@ -103,6 +103,7 @@ bool Storage::checkPasscode(uint32_t passcode)
 {
 	for (uint8_t i = 0; i < PASSCODE_MAX_COUNT; i++)
 	{
+    DEBUG.print("Current passcode: ", this->kcm.codes[i]);
 		if (this->kcm.codes[i] == passcode)
 		{
 			return true;

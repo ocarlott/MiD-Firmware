@@ -7,8 +7,7 @@ MotorModule::MotorModule()
 
 uint8_t MotorModule::setup()
 {
-  DEBUG.println("Test.");
-	this->turnTo(0);
+//	this->turnTo(0);
 	DEBUG.println("Finished setting up motor!");
 	return SUCCESS;
 }

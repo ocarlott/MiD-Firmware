@@ -1,6 +1,4 @@
 #include "AccelerometerModule.h"
-#include "Debug.h"
-#include "Notification.h"
 
 #define putDeviceInStandByMode writeRegister(AM_REG_CTRL_REG1, readRegister(AM_REG_CTRL_REG1) & 0xFE)
 #define putDeviceInActiveMode writeRegister(AM_REG_CTRL_REG1, readRegister(AM_REG_CTRL_REG1) | 1)

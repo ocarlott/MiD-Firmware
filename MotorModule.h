@@ -1,10 +1,12 @@
 #ifndef MOTORMODULE_H
 #define MOTORMODULE_H
 
-#include <Servo.h>
+#include "Servo.h"
 #include <Arduino.h>
 #include "Constant.h"
 #include "Debug.h"
+
+extern Debug DEBUG;
 
 class MotorModule
 {
