@@ -8,6 +8,7 @@
 #include "AccelerometerModule.h"
 #include "FingerprintModule.h"
 #include "Storage.h"
+#include "InterruptHandler.h"
 
 static Debug DEBUG;
 static Notification NOTIFIER;
@@ -19,24 +20,20 @@ KeypadModule kpm(&storage, &lock);
 AccelerometerModule am;
 FingerprintModule fpm(&storage, &lock);
 
-void keypadEventHandler(KeypadEvent key)
-{
-	kpm.handleKey(key);
-};
-
 void setup()
 {
 	Serial.begin(SERIAL_FREQ);
-	Serial.println("Start setting up.");
 	DEBUG.enable();
 	NOTIFIER.setup();
-  storage.setup();
+	storage.setup();
 	motorModule.setup();
 	am.setup();
 	fpm.setup();
 	kpm.begin();
 	kpm.setup(keypadEventHandler);
-  Serial.println("Got here!");
+	setupSwitches();
+	enableFrontSwitch();
+	enableBackButton();
 }
 
 void loop()
@@ -55,6 +52,6 @@ void loop()
 		{
 			fpm.run();
 		}
-//		DEBUG.println("Loop ended!");
+		//		DEBUG.println("Loop ended!");
 	}
 }

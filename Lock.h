@@ -16,6 +16,7 @@ class Lock
 	Lock(class MotorModule *m);
 	void openIfTrue(bool condition);
 	bool isOpened();
+	uint8_t toggleState();
 };
 
 #endif

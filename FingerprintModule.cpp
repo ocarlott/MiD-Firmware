@@ -40,8 +40,8 @@ void FingerprintModule::isr()
 uint8_t FingerprintModule::setup()
 {
 	pinMode(PIN_FINGERPRINT_WAKE, INPUT);
-  SoftwareSerial conn(PIN_FINGERPRINT_GREEN, PIN_FINGERPRINT_WHITE);
-  this->reader = new Adafruit_Fingerprint(&conn);
+  SoftwareSerial *conn = new SoftwareSerial(PIN_FINGERPRINT_GREEN, PIN_FINGERPRINT_WHITE);
+  this->reader = new Adafruit_Fingerprint(conn);
 	this->reader->begin(57600);
 	uint8_t counter = 5;
 	bool available;
@@ -60,7 +60,7 @@ uint8_t FingerprintModule::setup()
 	if (available)
 	{
 		this->reader->ledOff();
-		attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), FingerprintModule::isr, HIGH);
+		attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), FingerprintModule::isr, FALLING);
 		return SUCCESS;
 	}
 	return FAILED;
@@ -79,16 +79,16 @@ uint8_t FingerprintModule::run()
 	{
 		status = this->check(&id);
 	}
+  FingerprintModule::ready = false;
 	if (status == SUCCESS)
 	{
-		NOTIFIER.alertSuccess();
+		NOTIFIER.alertSuccess("Correct fingerprint!");
 		this->lock->openIfTrue(true);
 		return SUCCESS;
 	}
 	else
 	{
-		NOTIFIER.alertFailure();
-		DEBUG.println("Failed to open with fingerprint sensor!");
+		NOTIFIER.alertFailure("Failed to open with fingerprint sensor!");
 	}
 	this->reader->ledOff();
 	return FAILED;
@@ -115,7 +115,7 @@ uint8_t FingerprintModule::start()
 uint8_t FingerprintModule::stop()
 {
 	this->reader->ledOff();
-	attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), FingerprintModule::isr, HIGH);
+	attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), FingerprintModule::isr, FALLING);
 	return SUCCESS;
 }
 

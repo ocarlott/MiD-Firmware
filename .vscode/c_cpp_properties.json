@@ -13,7 +13,6 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/libraries",
                 "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/avr/include",
-                "/Users/ocarlott/Library/Arduino15/packages/adafruit/hardware/nrf52/0.11.0/**",
                 "/Users/ocarlott/Library/Arduino15/packages/adafruit/tools/**"
             ],
             "macFrameworkPath": [

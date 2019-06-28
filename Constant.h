@@ -16,23 +16,25 @@
 #define WAIT_TIME_FOR_SECOND_FINGERPRINT 10000
 
 // Pins configuration
-#define PIN_KEYPAD_ROW_1 11 // Pin 4 on Keypad
-#define PIN_KEYPAD_ROW_2 12 // Pin 5 on Keypad
-#define PIN_KEYPAD_ROW_3 13 // Pin 6 on Keypad
-#define PIN_KEYPAD_ROW_4 14 // Pin 7 on Keypad
-#define PIN_KEYPAD_COL_1 8  // Pin 1 on Keypad
-#define PIN_KEYPAD_COL_2 9  // Pin 2 on Keypad
-#define PIN_KEYPAD_COL_3 10 // Pin 3 on Keypad
+ #define PIN_KEYPAD_ROW_1 11 // Pin 4 on Keypad
+ #define PIN_KEYPAD_ROW_2 12 // Pin 5 on Keypad
+ #define PIN_KEYPAD_ROW_3 13 // Pin 6 on Keypad
+ #define PIN_KEYPAD_ROW_4 14 // Pin 7 on Keypad
+ #define PIN_KEYPAD_COL_1 8  // Pin 1 on Keypad
+ #define PIN_KEYPAD_COL_2 9  // Pin 2 on Keypad
+ #define PIN_KEYPAD_COL_3 10 // Pin 3 on Keypad
 // #define PIN_FINGERPRINT_RST 9
 // #define PIN_FINGERPRINT_WAKE 8 // These two are for capacitive
 // These values are for arduino uno
 #define PIN_FINGERPRINT_GREEN 10
 #define PIN_FINGERPRINT_WHITE 11
-#define PIN_FINGERPRINT_WAKE 8
+#define PIN_FINGERPRINT_WAKE 2
 #define PIN_ACCELEROMETER_INT 3
 #define PIN_OUTPUT_SUCCESS 6
 #define PIN_OUTPUT_FAILURE 7
 #define PIN_MOTOR 5
+#define PIN_BACK_BUTTON 8
+#define PIN_FRONT_SWITCH 4
 // These values are for adafruit
 // #define PIN_FINGERPRINT_GREEN 2
 // #define PIN_FINGERPRINT_WHITE 3
@@ -42,6 +44,8 @@
 // #define PIN_OUTPUT_FAILURE 29
 // #define PIN_MOTOR 27
 // #define PIN_MCP_INT 30
+// #define PIN_BACK_BUTTON
+// #define PIN_FRONT_SWITCH
 
 // Status code configuration
 #define SUCCESS 0

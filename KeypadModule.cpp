@@ -70,10 +70,6 @@ uint8_t KeypadModule::handleKey(char key)
 						this->currentIndex = 0;
 						this->lock->openIfTrue(this->storage->checkPasscode(passcode));
 					}
-					else
-					{
-						NOTIFIER.alertFailure();
-					}
 					this->startCapturing = false;
 				}
 				break;
@@ -88,7 +84,6 @@ uint8_t KeypadModule::handleKey(char key)
 						}
 						else
 						{
-							NOTIFIER.alertFailure();
 							this->startCapturing = false;
 						}
 					}
