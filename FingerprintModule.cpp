@@ -1,34 +1,12 @@
 #include "FingerprintModule.h"
-// FingerprintModule::FingerprintModule()
-// {
-// 	pinMode(PIN_FINGERPRINT_RST, OUTPUT);
-// 	digitalWrite(PIN_FINGERPRINT_RST, LOW);
-// 	delay(100);
-// 	digitalWrite(PIN_FINGERPRINT_RST, HIGH);
-// 	pinMode(PIN_FINGERPRINT_WAKE, INPUT);
-// 	Finger_SoftwareSerial_Init();
-// 	Finger_Wait_Until_OK();
-// }
 
-// void FingerprintModule::poll()
-// {
-// 	Analysis_PC_Command();
-
-// 	// If in sleep mode, turn on the auto wake-up function of the finger,
-// 	//begin to check if the finger is pressed, and wake up the module and match it
-// 	if (Finger_SleepFlag == 1)
-// 	{
-// 		Auto_Verify_Finger();
-// 	}
-// }
-
-// Optical Fingerprint section
 volatile bool FingerprintModule::ready;
 
 FingerprintModule::FingerprintModule(class Storage *s, class Lock *l) : storage(s), lock(l)
 {
 	FingerprintModule::ready = false;
 	this->enrollmentRequested = false;
+	this->enabled = true;
 	this->waitTimeForCheckingFingerprint = 2000;
 }
 
@@ -39,9 +17,8 @@ void FingerprintModule::isr()
 
 uint8_t FingerprintModule::setup()
 {
-	pinMode(PIN_FINGERPRINT_WAKE, INPUT);
-  SoftwareSerial *conn = new SoftwareSerial(PIN_FINGERPRINT_GREEN, PIN_FINGERPRINT_WHITE);
-  this->reader = new Adafruit_Fingerprint(conn);
+	pinMode(PIN_FINGERPRINT_YELLOW, INPUT);
+	this->reader = new AdafruitFingerprint(&Serial1);
 	this->reader->begin(57600);
 	uint8_t counter = 5;
 	bool available;
@@ -56,41 +33,65 @@ uint8_t FingerprintModule::setup()
 		{
 			DEBUG.println("Did not find fingerprint sensor :(");
 		}
+		counter--;
 	} while (counter && !available);
 	if (available)
 	{
 		this->reader->ledOff();
-		attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), FingerprintModule::isr, FALLING);
+		this->enable();
 		return SUCCESS;
 	}
 	return FAILED;
 }
 
+uint8_t FingerprintModule::enable()
+{
+	attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_YELLOW), FingerprintModule::isr, ISR_DEFERRED | FALLING);
+	this->enabled = true;
+}
+
+uint8_t FingerprintModule::disable()
+{
+	detachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_YELLOW));
+	this->enabled = false;
+}
+
 uint8_t FingerprintModule::run()
 {
-	uint8_t id;
-	uint8_t status;
-	this->reader->ledOn();
-	if (this->enrollmentRequested)
+	if (this->enabled)
 	{
-		status = this->enroll(&id);
+		uint8_t id;
+		uint8_t status;
+		if (SUCCESS != this->start())
+		{
+			return FAILED;
+		}
+		if (this->enrollmentRequested)
+		{
+			DEBUG.println("Start enrolling fingerprint!");
+			status = this->enroll(&id);
+			DEBUG.print("Enrollment completes with status: ", status);
+			this->enrollmentRequested = false;
+		}
+		else
+		{
+			DEBUG.println("Start checking fingerprint!");
+			status = this->check(&id);
+			DEBUG.print("Checking fingerprint completes with status: ", status);
+			FingerprintModule::ready = false;
+			if (status == SUCCESS)
+			{
+				NOTIFIER.alertSuccess("Correct fingerprint!");
+				this->lock->openIfTrue(true);
+			}
+			else
+			{
+				NOTIFIER.alertFailure("Failed to open with fingerprint sensor!");
+			}
+		}
+		this->stop();
+		return status;
 	}
-	else
-	{
-		status = this->check(&id);
-	}
-  FingerprintModule::ready = false;
-	if (status == SUCCESS)
-	{
-		NOTIFIER.alertSuccess("Correct fingerprint!");
-		this->lock->openIfTrue(true);
-		return SUCCESS;
-	}
-	else
-	{
-		NOTIFIER.alertFailure("Failed to open with fingerprint sensor!");
-	}
-	this->reader->ledOff();
 	return FAILED;
 }
 
@@ -107,15 +108,15 @@ uint8_t FingerprintModule::addFingerprint()
 
 uint8_t FingerprintModule::start()
 {
-	detachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE));
+	this->disable();
 	this->reader->ledOn();
-	return FAILED;
+	return SUCCESS;
 }
 
 uint8_t FingerprintModule::stop()
 {
 	this->reader->ledOff();
-	attachInterrupt(digitalPinToInterrupt(PIN_FINGERPRINT_WAKE), FingerprintModule::isr, FALLING);
+	this->enable();
 	return SUCCESS;
 }
 
@@ -264,10 +265,6 @@ uint8_t FingerprintModule::enroll(uint8_t *returnId)
 	{
 		return FAILED;
 	}
-	if (SUCCESS != this->start())
-	{
-		return FAILED;
-	}
 	uint8_t id;
 	if (SUCCESS == this->storage->getNextIdForFingerprint(&id))
 	{
@@ -308,7 +305,7 @@ uint8_t FingerprintModule::enroll(uint8_t *returnId)
 		*returnId = id;
 		return SUCCESS;
 	}
-	return this->stop();
+	return FAILED;
 }
 
 uint8_t FingerprintModule::check(uint8_t *returnId)
@@ -363,9 +360,4 @@ uint8_t FingerprintModule::search(uint8_t *returnId)
 	DEBUG.print("Confidence score: ", this->reader->confidence);
 	*returnId = this->reader->fingerID;
 	return SUCCESS;
-}
-
-FingerprintModule::~FingerprintModule()
-{
-	delete this->reader;
 }

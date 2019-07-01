@@ -5,54 +5,32 @@
 #define PASSCODE_LENGTH 5
 #define MAX_DELAY_TIME_BETWEEN_KEYS 2000
 #define BLUETOOH_PASSCODE_LENGTH 5
-#define ROWS 4
-#define COLS 3
 #define STARTED_VALUE 9876
 #define MCP_ADDR 0x20
 #define SERIAL_FREQ 9600
 #define FINGERPRINT_MAX_COUNT 10
-#define COUNT_FOR_ORIENTATION_READING 100 // Accelerometer read with freq of 1.56Hz so 100 times as slow will be ~ 64s
+#define COUNT_FOR_ORIENTATION_READING 100 // Accelerometer reads with freq of 100Hz in active mode and 6.25Hz in standby mode
 #define WAIT_TIME_FOR_FIRST_FINGERPRINT 1500
 #define WAIT_TIME_FOR_SECOND_FINGERPRINT 10000
+#define FILE_DATA "/data"
 
 // Pins configuration
- #define PIN_KEYPAD_ROW_1 11 // Pin 4 on Keypad
- #define PIN_KEYPAD_ROW_2 12 // Pin 5 on Keypad
- #define PIN_KEYPAD_ROW_3 13 // Pin 6 on Keypad
- #define PIN_KEYPAD_ROW_4 14 // Pin 7 on Keypad
- #define PIN_KEYPAD_COL_1 8  // Pin 1 on Keypad
- #define PIN_KEYPAD_COL_2 9  // Pin 2 on Keypad
- #define PIN_KEYPAD_COL_3 10 // Pin 3 on Keypad
-// #define PIN_FINGERPRINT_RST 9
-// #define PIN_FINGERPRINT_WAKE 8 // These two are for capacitive
-// These values are for arduino uno
-#define PIN_FINGERPRINT_GREEN 10
-#define PIN_FINGERPRINT_WHITE 11
-#define PIN_FINGERPRINT_WAKE 2
-#define PIN_ACCELEROMETER_INT 3
-#define PIN_OUTPUT_SUCCESS 6
-#define PIN_OUTPUT_FAILURE 7
-#define PIN_MOTOR 5
-#define PIN_BACK_BUTTON 8
-#define PIN_FRONT_SWITCH 4
-// These values are for adafruit
-// #define PIN_FINGERPRINT_GREEN 2
-// #define PIN_FINGERPRINT_WHITE 3
-// #define PIN_FINGERPRINT_WAKE 4
-// #define PIN_ACCELEROMETER_INT 5
-// #define PIN_OUTPUT_SUCCESS 28
-// #define PIN_OUTPUT_FAILURE 29
-// #define PIN_MOTOR 27
-// #define PIN_MCP_INT 30
-// #define PIN_BACK_BUTTON
-// #define PIN_FRONT_SWITCH
+#define PIN_FINGERPRINT_YELLOW A5
+#define PIN_ACCELEROMETER_INT A1
+#define PIN_KEYPAD_INT A0
+#define PIN_LED_RED g_ADigitalPinMap[5]
+#define PIN_LED_GREEN g_ADigitalPinMap[6]
+#define PIN_LED_BLUE g_ADigitalPinMap[9]
+#define PIN_MOTOR A2
+#define PIN_BACK_BUTTON A4
+#define PIN_FRONT_SWITCH A3
 
 // Status code configuration
 #define SUCCESS 0
-#define FULL -1
-#define INVALID_ID -2
-#define FAILED -3
-#define NO_MATCH -4
+#define FULL 1
+#define INVALID_ID 2
+#define FAILED 3
+#define NO_MATCH 4
 
 /*
 * Accelerometer Module constants
@@ -130,14 +108,103 @@
 #define AM_ERROR_INT 0
 #define AM_PL_INT 1
 #define AM_MOTION_INT 2
-#define AM_TAP_INT 3
+#define AM_KNOCK_INT 3
 #define AM_DATA_INT 4
 #define AM_SLEEP_INT 5
 // Interrupt bits
 #define AM_MOTION_INT_BIT 0x04
 #define AM_PL_INT_BIT 0x10
-#define AM_TAP_INT_BIT 0x08
+#define AM_KNOCK_INT_BIT 0x08
 #define AM_SLEEP_INT_BIT 0x80
 #define AM_DATA_READY_INT_BIT 0x01
+
+// Keypad constants
+#define KP_ADDR 0x5B
+
+// Register Defines
+#define KP_E0BV 0x1E
+#define KP_E1BV 0x1F
+#define KP_E2BV 0x20
+#define KP_E3BV 0x21
+#define KP_E4BV 0x22
+#define KP_E5BV 0x23
+#define KP_E6BV 0x24
+#define KP_E7BV 0x25
+#define KP_E8BV 0x26
+#define KP_E9BV 0x27
+#define KP_E10BV 0x28
+#define KP_E11BV 0x29
+#define KP_E12BV 0x2A
+
+#define KP_MHD_R 0x2B
+#define KP_NHD_R 0x2C
+#define KP_NCL_R 0x2D
+#define KP_FDL_R 0x2E
+#define KP_MHD_F 0x2F
+#define KP_NHD_F 0x30
+#define KP_NCL_F 0x31
+#define KP_FDL_F 0x32
+
+#define KP_ELE0_T 0x41
+#define KP_ELE0_R 0x42
+#define KP_ELE1_T 0x43
+#define KP_ELE1_R 0x44
+#define KP_ELE2_T 0x45
+#define KP_ELE2_R 0x46
+#define KP_ELE3_T 0x47
+#define KP_ELE3_R 0x48
+#define KP_ELE4_T 0x49
+#define KP_ELE4_R 0x4A
+#define KP_ELE5_T 0x4B
+#define KP_ELE5_R 0x4C
+#define KP_ELE6_T 0x4D
+#define KP_ELE6_R 0x4E
+#define KP_ELE7_T 0x4F
+#define KP_ELE7_R 0x50
+#define KP_ELE8_T 0x51
+#define KP_ELE8_R 0x52
+#define KP_ELE9_T 0x53
+#define KP_ELE9_R 0x54
+#define KP_ELE10_T 0x55
+#define KP_ELE10_R 0x56
+#define KP_ELE11_T 0x57
+#define KP_ELE11_R 0x58
+
+#define KP_AFE1_CFG 0x5C
+#define KP_AFE2_CFG 0x5D
+#define KP_ELE_CFG 0x5E
+
+#define KP_GPIO_CTRL0 0x73
+#define KP_GPIO_CTRL1 0x74
+#define KP_GPIO_DATA 0x75
+#define KP_GPIO_DIR 0x76
+#define KP_GPIO_EN 0x77
+#define KP_GPIO_SET 0x78
+#define KP_GPIO_CLEAR 0x79
+#define KP_GPIO_TOGGLE 0x7A
+
+#define KP_ATO_CFG0 0x7B
+#define KP_ATO_CFGU 0x7D
+#define KP_ATO_CFGL 0x7E
+#define KP_ATO_CFGT 0x7F
+#define KP_RES_CF 0x80
+
+#define KP_TOU_THRESH 0x06
+#define KP_REL_THRESH 0x03
+#define KP_START_BV 0x90
+
+#define NO_KEY 15
+#define KEY_ONE 1
+#define KEY_TWO 2
+#define KEY_THREE 3
+#define KEY_FOUR 4
+#define KEY_FIVE 5
+#define KEY_SIX 6
+#define KEY_SEVEN 7
+#define KEY_EIGHT 8
+#define KEY_NINE 9
+#define KEY_ZERO 0
+#define KEY_STAR 11
+#define KEY_POUND 12
 
 #endif

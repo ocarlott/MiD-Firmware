@@ -1,7 +1,0 @@
-{
-    "programmer": "AVRISP mkII",
-    "board": "adafruit:nrf52:feather52832",
-    "port": "/dev/cu.SLAB_USBtoUART",
-    "sketch": "main.ino",
-    "configuration": "softdevice=s132v6,debug=l2"
-}

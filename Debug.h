@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "Constant.h"
+#include <SoftwareSerial.h>
 
 #define DEFAULT_DEBUG_VALUE 87
 
@@ -14,14 +15,16 @@ class Debug
   public:
 	void enable()
 	{
-    Serial.println("Enabling DEBUG!");
+		Serial.println("Enabling DEBUG!");
 		enabled = true;
 	};
+
 	void disable()
 	{
-    Serial.println("Disabling DEBUG!");
+		Serial.println("Disabling DEBUG!");
 		enabled = false;
 	};
+
 	void print(const char *str, char c = DEFAULT_DEBUG_VALUE, const char *unit = "0")
 	{
 		if (enabled)
@@ -45,6 +48,7 @@ class Debug
 			}
 		}
 	};
+
 	void print(const char *str, uint8_t n = DEFAULT_DEBUG_VALUE, const char *unit = "")
 	{
 		if (enabled)
@@ -68,6 +72,7 @@ class Debug
 			}
 		}
 	};
+
 	void print(const char *str, uint16_t n = DEFAULT_DEBUG_VALUE, const char *unit = "")
 	{
 		if (enabled)
@@ -91,6 +96,7 @@ class Debug
 			}
 		}
 	};
+
 	void print(const char *str, uint32_t n = DEFAULT_DEBUG_VALUE, const char *unit = "")
 	{
 		if (enabled)
@@ -114,6 +120,7 @@ class Debug
 			}
 		}
 	};
+
 	void println(const char *str)
 	{
 		if (enabled)
@@ -121,6 +128,18 @@ class Debug
 			Serial.println(str);
 		}
 	};
+
+	void flushDebugMessages()
+	{
+		if (enabled)
+		{
+			Serial.flush();
+			// wait for transmit buffer to empty
+//			while ((UCSR0A & _BV(TXC0)) == 0)
+//				;
+      delay(100);
+		}
+	}
 };
 
 #endif

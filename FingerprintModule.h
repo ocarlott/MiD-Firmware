@@ -1,34 +1,27 @@
 #ifndef FINGERPRINTMODULE_H
 #define FINGERPRINTMODULE_H
 
-// #include <finger.h>
 #include "Constant.h"
 #include <Arduino.h>
 #include "Storage.h"
 #include "Lock.h";
-#include "Adafruit_Fingerprint.h"
-#include <SoftwareSerial.h>
+#include "AdafruitFingerprint.h"
 #include "Debug.h"
 #include "Notification.h"
 
 extern Debug DEBUG;
 extern Notification NOTIFIER;
-// class FingerprintModule
-// {
-//   public:
-// 	FingerprintModule();
-// 	void poll();
-// };
 
 class FingerprintModule
 {
   private:
-	class Adafruit_Fingerprint *reader;
+	class AdafruitFingerprint *reader;
 	class Storage *storage;
 	class Lock *lock;
 	static volatile bool ready;
 	bool enrollmentRequested;
 	uint16_t waitTimeForCheckingFingerprint;
+	bool enabled;
 	static void isr();
 	uint8_t start();
 	uint8_t stop();
@@ -43,11 +36,12 @@ class FingerprintModule
 
   public:
 	FingerprintModule(class Storage *s, class Lock *l);
-	~FingerprintModule();
 	uint8_t setup();
 	uint8_t run();
 	uint8_t addFingerprint();
 	bool isReady();
+	uint8_t disable();
+	uint8_t enable();
 };
 
 #endif

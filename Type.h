@@ -15,4 +15,11 @@ struct FingerprintManager
 	uint8_t ids[FINGERPRINT_MAX_COUNT];
 };
 
+struct CredentialsWrapper
+{
+	struct KeyCodeManager kcm;
+	struct FingerprintManager fpm;
+	uint32_t bluetoothPasscode;
+};
+
 #endif

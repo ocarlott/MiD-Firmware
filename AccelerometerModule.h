@@ -1,7 +1,6 @@
 #ifndef ACCELEROMETERMODULE_H
 #define ACCELEROMETERMODULE_H
 
-#include <Wire.h>
 #include "Constant.h"
 #include "WiredDevice.h"
 #include <Arduino.h>
@@ -11,39 +10,40 @@
 extern Debug DEBUG;
 extern Notification NOTIFIER;
 
-class AccelerometerModule : WiredDevice
+class AccelerometerModule : public WiredDevice
 {
   private:
-	class Notification *notifier;
-	uint8_t thresholdForTap;
+	uint8_t thresholdForKnock;
 	uint8_t thresholdForMotion;
 	uint16_t deboundCounterNotification;
-	int8_t _i2caddr;
 	uint16_t divider;
-	volatile bool hasInterrupt;
+	volatile static bool ready;
 	uint64_t lastAlertTime;
+	bool enabled;
 	int16_t x, y, z;
 	uint8_t enableInterrupt(uint8_t value);
 
   public:
 	AccelerometerModule();
 	uint8_t read();
+	uint8_t enable();
+	uint8_t disable();
 	uint8_t setup(uint8_t addr = AM_DEFAULT_ADDRESS);
-	uint8_t setThresholdForTapDetection(uint8_t x_th, uint8_t y_th, uint16_t z_th); // 0 - 100 (0 - 5g)
-	uint8_t setAxisForTapDetection(bool x = true, bool y = true, bool z = true);
-	uint8_t setThresholdForMotionDetection(uint8_t threshold); // 0 - 100 (coresponding for 0 to 5g)
+	uint8_t setThresholdForKnockDetection(uint8_t x_th, uint8_t y_th, uint16_t z_th); // 0 - 100 (0 - 4g)
+	uint8_t setAxisForKnockDetection(bool x = true, bool y = true, bool z = true);
+	uint8_t setThresholdForMotionDetection(uint8_t threshold); // 0 - 100 (coresponding for 0 to 4g)
 	uint8_t setAxisForMotionDetection(bool x = true, bool y = true, bool z = true);
-	uint8_t setTimeLimitForTapDetection(uint8_t time = 500);	// Max time 638ms for 100Hz
-	uint8_t setLatencyTimeForTapDetection(uint8_t time = 1200); // Max 1276ms for 100Hz
+	uint8_t setTimeLimitForKnockDetection(uint8_t time = 160);	// Max 5.1s
+	uint8_t setTimeWindowForSecondKnock(uint8_t time = 2400);	 // Max 10.2s
+	uint8_t setLatencyTimeForKnockDetection(uint8_t time = 2000); // Max 10.2s
 	uint8_t enableLandscapeChangeDetection();
-	uint8_t enableTapDetection();
+	uint8_t enableKnockDetection();
 	uint8_t enableMotionDetection();
 	uint8_t enableSleepInterrupt();
-	bool isTapDetectedInXAxis();
-	uint8_t getInterruptSource(uint8_t *origin);
+	uint8_t handleInterrupt(uint8_t *origin = NULL);
 	uint8_t printNewData();
-	uint8_t alertInterrupt();
-	bool causedWakeUp();
+	void static isr();
+	bool isReady();
 	uint8_t clearInterrupt();
 	uint8_t readVariousRegs();
 	uint8_t getOrientation(uint8_t *orientation);

@@ -4,25 +4,18 @@
 #include <Arduino.h>
 #include "Type.h"
 #include "Constant.h"
-#include "EEPROM.h"
 #include "Debug.h"
+#include <Adafruit_LittleFS.h>
+#include <InternalFileSystem.h>
 
 extern Debug DEBUG;
 
 class Storage
 {
   private:
-	uint8_t keyCodeAddr;
-	uint8_t blueCodeAddr;
-	uint32_t blueCode;
-	uint8_t flag;
-	uint8_t flagAddr;
-	uint8_t fingerIdAddr;
-	struct FingerprintManager fpm;
-	struct KeyCodeManager kcm;
+	struct CredentialsWrapper cw;
 
   public:
-	Storage();
 	uint8_t setup();
 	uint8_t getBlueCode(uint32_t *returnValue);
 	uint8_t getPasscode(uint8_t id, uint32_t *passcode);

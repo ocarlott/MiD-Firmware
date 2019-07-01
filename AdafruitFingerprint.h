@@ -1,5 +1,5 @@
-#ifndef ADAFRUIT_FINGERPRINT_H
-#define ADAFRUIT_FINGERPRINT_H
+#ifndef ADAFRUITFINGERPRINT_H
+#define ADAFRUITFINGERPRINT_H
 
 /***************************************************
   This is a library for our optical Fingerprint sensor
@@ -18,7 +18,6 @@
  ****************************************************/
 
 #include <Arduino.h>
-#include <SoftwareSerial.h>
 
 #define FINGERPRINT_OK 0x00
 #define FINGERPRINT_PACKETRECIEVEERR 0x01
@@ -67,12 +66,10 @@
 #define FINGERPRINT_TEMPLATECOUNT 0x1D
 #define FINGERPRINT_LEDON 0x50
 #define FINGERPRINT_LEDOFF 0x51
-//#define FINGERPRINT_DEBUG
-
 #define DEFAULTTIMEOUT 1000 ///< UART reading timeout in milliseconds
 
 ///! Helper class to craft UART packets
-struct Adafruit_Fingerprint_Packet
+struct AdafruitFingerprintPacket
 {
 
 	/**************************************************************************/
@@ -84,7 +81,7 @@ struct Adafruit_Fingerprint_Packet
 */
 	/**************************************************************************/
 
-	Adafruit_Fingerprint_Packet(uint8_t type, uint16_t length, uint8_t *data)
+	AdafruitFingerprintPacket(uint8_t type, uint16_t length, uint8_t *data)
 	{
 		this->start_code = FINGERPRINT_STARTCODE;
 		this->type = type;
@@ -106,12 +103,10 @@ struct Adafruit_Fingerprint_Packet
 };
 
 ///! Helper class to communicate with and keep state for fingerprint sensors
-class Adafruit_Fingerprint
+class AdafruitFingerprint
 {
   public:
-	Adafruit_Fingerprint(SoftwareSerial *ss, uint32_t password = 0x0);
-	Adafruit_Fingerprint(HardwareSerial *hs, uint32_t password = 0x0);
-
+	AdafruitFingerprint(HardwareSerial *hs, uint32_t password = 0x0);
 	void begin(uint32_t baud);
 
 	boolean verifyPassword(void);
@@ -127,8 +122,8 @@ class Adafruit_Fingerprint
 	uint8_t fingerFastSearch(void);
 	uint8_t getTemplateCount(void);
 	uint8_t setPassword(uint32_t password);
-	void writeStructuredPacket(const Adafruit_Fingerprint_Packet &p);
-	uint8_t getStructuredPacket(Adafruit_Fingerprint_Packet *p, uint16_t timeout = DEFAULTTIMEOUT);
+	void writeStructuredPacket(const AdafruitFingerprintPacket &p);
+	uint8_t getStructuredPacket(AdafruitFingerprintPacket *p, uint16_t timeout = DEFAULTTIMEOUT);
 	uint8_t ledOn(void);
 	uint8_t ledOff(void);
 
@@ -146,7 +141,6 @@ class Adafruit_Fingerprint
 	uint8_t recvPacket[20];
 
 	Stream *mySerial;
-	SoftwareSerial *swSerial;
 	HardwareSerial *hwSerial;
 };
 

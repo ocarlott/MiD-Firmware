@@ -1,6 +1,8 @@
 #ifndef WIREDDEVICE_H
 #define WIREDDEVICE_H
 
+#include <Wire.h>
+
 class WiredDevice
 {
   protected:
