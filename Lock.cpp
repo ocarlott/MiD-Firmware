@@ -55,3 +55,10 @@ uint8_t Lock::addEventListener(callback_t oC, callback_t cC)
 	this->openCallback = oC;
 	this->closeCallback = cC;
 }
+
+uint8_t Lock::lock()
+{
+	this->motorModule->turnToClosePosition();
+	this->isLocked = true;
+	this->closeCallback();
+}

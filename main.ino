@@ -51,39 +51,40 @@ void setup()
 	kpm.setup();
 	sm.setup();
 	lock.addEventListener(callbackOnOpened, callbackOnClosed);
+  NRF_NFCT->TASKS_DISABLE = 1;
+  NRF_PWM1->ENABLE = 0;
+  NRF_PWM2->ENABLE = 0;
+  NRF_SAADC->ENABLE = 0;
 	Serial.println("Done setup!");
 }
 
 void loop()
 {
 	DEBUG.flushDebugMessages();
-	//  sleep_enable();
-	//  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-	//  sleep_cpu();
-	if (lock.isOpened())
-	{
-	}
-	else
-	{
-		if (am.isReady())
-		{
-			am.handleInterrupt();
-			am.printNewData();
-			am.clearInterrupt();
-		};
-    
-		if (kpm.isReady())
-		{
-			kpm.handleKey();
-		};
+ 
+	if (am.isReady())
+  {
+    am.handleInterrupt();
+    am.printNewData();
+    am.clearInterrupt();
+  };
 
-		if (fpm.isReady())
-		{
-			fpm.run();
-		};
-	}
+  if (fpm.isReady())
+  {
+    fpm.run();
+  };
+ 
+  if (kpm.isReady())
+  {
+    kpm.handleKey();
+  };
+  
 	if (sm.isReady())
 	{
 		sm.run();
 	}
+
+  sd_power_mode_set(NRF_POWER_MODE_LOWPWR);
+  __WFI();
+  waitForEvent();
 }

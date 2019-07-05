@@ -7,7 +7,7 @@
 #define BLUETOOH_PASSCODE_LENGTH 5
 #define STARTED_VALUE 9876
 #define MCP_ADDR 0x20
-#define SERIAL_FREQ 9600
+#define SERIAL_FREQ 115200
 #define FINGERPRINT_MAX_COUNT 10
 #define COUNT_FOR_ORIENTATION_READING 100 // Accelerometer reads with freq of 100Hz in active mode and 6.25Hz in standby mode
 #define WAIT_TIME_FOR_FIRST_FINGERPRINT 1500

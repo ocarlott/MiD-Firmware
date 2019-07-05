@@ -62,10 +62,6 @@ uint8_t FingerprintModule::run()
 	{
 		uint8_t id;
 		uint8_t status;
-		if (SUCCESS != this->start())
-		{
-			return FAILED;
-		}
 		if (this->enrollmentRequested)
 		{
 			DEBUG.println("Start enrolling fingerprint!");
@@ -89,7 +85,6 @@ uint8_t FingerprintModule::run()
 				NOTIFIER.alertFailure("Failed to open with fingerprint sensor!");
 			}
 		}
-		this->stop();
 		return status;
 	}
 	return FAILED;
@@ -261,74 +256,67 @@ uint8_t FingerprintModule::storeModel(uint8_t id)
 
 uint8_t FingerprintModule::enroll(uint8_t *returnId)
 {
-	if (!FingerprintModule::ready)
+  this->start();
+  uint8_t status = FAILED;
+	if (FingerprintModule::ready)
 	{
-		return FAILED;
+    uint8_t id;
+    if (SUCCESS == this->storage->getNextIdForFingerprint(&id))
+    {
+      DEBUG.print("Waiting for valid finger to enroll with ID #", id);
+      if (SUCCESS == this->getImage(WAIT_TIME_FOR_FIRST_FINGERPRINT))
+      {
+        if (SUCCESS == this->convertImage())
+        {
+          NOTIFIER.alertNextStep("Remove finger");
+          // While (input from capacitive touch is not detected);
+          this->waitForFingerRemoved();
+          NOTIFIER.alertNextStep("Waiting for another image to confirm. Place same finger again!");
+          if (SUCCESS == this->getImage(WAIT_TIME_FOR_SECOND_FINGERPRINT))
+          {
+            // OK success!
+        
+            this->convertImage();
+          
+            // OK converted!
+          
+            if (SUCCESS == this->createModel())
+            {
+              if (SUCCESS == this->storeModel(id))
+              {
+                *returnId = id;
+                status = SUCCESS;
+              }
+            }
+          }
+        }
+      }
+    }
 	}
-	uint8_t id;
-	if (SUCCESS == this->storage->getNextIdForFingerprint(&id))
-	{
-		DEBUG.print("Waiting for valid finger to enroll with ID #", id);
-		if (SUCCESS != this->getImage(WAIT_TIME_FOR_FIRST_FINGERPRINT))
-		{
-			return FAILED;
-		}
-	}
-
-	if (SUCCESS != this->convertImage())
-	{
-		return FAILED;
-	}
-
-	NOTIFIER.alertNextStep("Remove finger");
-	// While (input from capacitive touch is not detected);
-	this->waitForFingerRemoved();
-	NOTIFIER.alertNextStep("Waiting for another image to confirm. Place same finger again!");
-	if (SUCCESS != this->getImage(WAIT_TIME_FOR_SECOND_FINGERPRINT))
-	{
-		return FAILED;
-	}
-
-	// OK success!
-
-	this->convertImage();
-
-	// OK converted!
-
-	if (SUCCESS != this->createModel())
-	{
-		return FAILED;
-	}
-
-	if (SUCCESS == this->storeModel(id))
-	{
-		*returnId = id;
-		return SUCCESS;
-	}
-	return FAILED;
+  this->stop();
+	return status;
 }
 
 uint8_t FingerprintModule::check(uint8_t *returnId)
 {
-	if (SUCCESS != this->getImage(this->waitTimeForCheckingFingerprint))
+  uint8_t status = FAILED;
+  this->start();
+	if (SUCCESS == this->getImage(this->waitTimeForCheckingFingerprint))
 	{
-		return FAILED;
-	}
+		// OK success!
 
-	// OK success!
-
-	if (SUCCESS != this->convertImage())
-	{
-		return FAILED;
+    if (SUCCESS == this->convertImage())
+    {
+      // OK converted!
+      uint8_t id;
+      status = this->search(&id);
+      if (SUCCESS == status)
+      {
+        *returnId = id;
+      }
+    }
 	}
-
-	// OK converted!
-	uint8_t id;
-	uint8_t status = this->search(&id);
-	if (SUCCESS == status)
-	{
-		*returnId = id;
-	}
+  this->stop();
 	return status;
 }
 

@@ -23,6 +23,7 @@ class Lock
 	uint8_t openWithKey();
 	uint8_t toggleState();
 	uint8_t addEventListener(callback_t openCallback, callback_t closeCallback);
+	uint8_t lock();
 };
 
 #endif

@@ -54,7 +54,7 @@ uint8_t AccelerometerModule::setup(uint8_t addr)
 	// Restore to active mode
 	putDeviceInActiveMode;
 	setThresholdForMotionDetection(25);
-	setAxisForMotionDetection(false, false, true);
+	setAxisForMotionDetection(true, true, false);
 	setThresholdForKnockDetection(1, 1, 1);
 	setTimeLimitForKnockDetection();
 	setLatencyTimeForKnockDetection();

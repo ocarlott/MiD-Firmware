@@ -19,7 +19,6 @@ class KeypadModule : public WiredDevice
 	bool enabled;
 	class Storage *storage;
 	class Lock *lock;
-	bool startCapturing;
 	char passcode[PASSCODE_LENGTH];
 	static void isr();
 	static volatile bool ready;

@@ -7,8 +7,11 @@ KeypadModule::KeypadModule(class Storage *s, class Lock *l) : storage(s), lock(l
 	this->lastTime = millis();
 	this->currentIndex = 0;
 	this->enabled = true;
-	this->startCapturing = false;
-  this->addr = KP_ADDR;
+	this->addr = KP_ADDR;
+	for (uint8_t i = 0; i < PASSCODE_LENGTH; i++)
+	{
+		this->passcode[i] = -1;
+	}
 	KeypadModule::ready = false;
 }
 
@@ -104,7 +107,6 @@ uint8_t KeypadModule::enable()
 
 uint8_t KeypadModule::disable()
 {
-  
 	detachInterrupt(digitalPinToInterrupt(PIN_KEYPAD_INT));
 	this->enabled = false;
 	return SUCCESS;
@@ -114,7 +116,7 @@ uint8_t KeypadModule::handleKey()
 {
 	if (this->enabled)
 	{
-    this->disable();
+		this->disable();
 		uint8_t key;
 		this->getKey(&key);
 		if (key != NO_KEY)
@@ -124,48 +126,48 @@ uint8_t KeypadModule::handleKey()
 			switch (key)
 			{
 			case KEY_STAR:
-				this->currentIndex = 0;
-				this->startCapturing = true;
+				if (!this->lock->isOpened())
+        {
+          this->currentIndex = 0;
+        }
 				break;
 			case KEY_POUND:
-				if (this->startCapturing)
+				if (this->lock->isOpened())
 				{
-					if (this->currentIndex == PASSCODE_LENGTH)
-					{
-						uint32_t passcode;
-						this->getComputedPasscode(&passcode);
-						this->currentIndex = 0;
-						this->lock->openIfTrue(this->storage->checkPasscode(passcode));
-					}
-					this->startCapturing = false;
+					this->lock->lock();
 				}
+				else
+				{
+					uint32_t passcode;
+					this->getComputedPasscode(&passcode);
+					this->lock->openIfTrue(this->storage->checkPasscode(passcode));
+				}
+				this->currentIndex = 0;
 				break;
 			default:
-				if (this->startCapturing)
-				{
-					if (this->currentIndex < PASSCODE_LENGTH)
-					{
-						if ((currentTime - this->lastTime <= MAX_DELAY_TIME_BETWEEN_KEYS))
-						{
-							this->passcode[this->currentIndex++] = key;
-						}
-						else
-						{
-							this->startCapturing = false;
-						}
-					}
-					else
-					{
-						this->startCapturing = false;
-					}
-				}
+        if (!this->lock->isOpened())
+        {
+  				if ((currentTime - this->lastTime <= MAX_DELAY_TIME_BETWEEN_KEYS))
+  				{
+  					if (this->currentIndex < PASSCODE_LENGTH)
+  					{
+  						this->passcode[this->currentIndex++] = key;
+  					}
+  				}
+  				else
+  				{
+  					this->currentIndex = 0;
+  					this->passcode[this->currentIndex++] = key;
+  				}
+        }
 				break;
 			}
 			this->lastTime = currentTime;
 		}
-    this->enable();
+		this->enable();
 	}
 	KeypadModule::ready = false;
+  DEBUG.println("Got here!");
 	return SUCCESS;
 }
 
