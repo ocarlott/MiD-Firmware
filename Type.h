@@ -19,7 +19,7 @@ struct CredentialsWrapper
 {
 	struct KeyCodeManager kcm;
 	struct FingerprintManager fpm;
-	uint32_t bluetoothPasscode;
+	uint8_t bluetoothPasscode[BLUETOOTH_PASSCODE_MAX_LENGTH];
 };
 
 #endif

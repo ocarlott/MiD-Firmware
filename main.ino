@@ -2,6 +2,7 @@
 #define ARDUINO_ARCH_NRF52
 #include <Arduino.h>
 #include "Debug.h"
+#include "BluetoothModule.h"
 #include "Notification.h"
 #include "KeypadModule.h"
 #include "Constant.h"
@@ -20,24 +21,29 @@ Lock lock(&motorModule);
 KeypadModule kpm(&storage, &lock);
 AccelerometerModule am;
 FingerprintModule fpm(&storage, &lock);
-SwitchModule sm(&lock);
+BluetoothModule ble;
+SwitchModule sm(&lock, &ble);
 
 void callbackOnClosed(void)
 {
-  DEBUG.println("Close callback called!");
-  kpm.enable();
-  kpm.handleKey();
-  fpm.enable();
-  am.enable();
-  am.clearInterrupt();
+	DEBUG.println("Close callback called!");
+	ble.disableBonding();
+	ble.stopAdvertising();
+	kpm.enable();
+	kpm.handleKey();
+	fpm.enable();
+	am.enable();
+	am.clearInterrupt();
 }
 
 void callbackOnOpened(void)
 {
-  DEBUG.println("Open callback called!");
+	DEBUG.println("Open callback called!");
+	ble.enableBonding();
+	ble.startAdvertising();
 	kpm.disable();
-  fpm.disable();
-  am.disable();
+	fpm.disable();
+	am.disable();
 }
 
 void setup()
@@ -51,40 +57,42 @@ void setup()
 	kpm.setup();
 	sm.setup();
 	lock.addEventListener(callbackOnOpened, callbackOnClosed);
-  NRF_NFCT->TASKS_DISABLE = 1;
-  NRF_PWM1->ENABLE = 0;
-  NRF_PWM2->ENABLE = 0;
-  NRF_SAADC->ENABLE = 0;
+	//	NRF_NFCT->TASKS_DISABLE = 1;
+	//	NRF_PWM1->ENABLE = 0;
+	//	NRF_PWM2->ENABLE = 0;
+	//	NRF_SAADC->ENABLE = 0;
+	uint8_t data[15] = {77, 105, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	ble.setup(&storage);
+	ble.configureServices();
 	Serial.println("Done setup!");
 }
 
 void loop()
 {
 	DEBUG.flushDebugMessages();
- 
-	if (am.isReady())
-  {
-    am.handleInterrupt();
-    am.printNewData();
-    am.clearInterrupt();
-  };
 
-  if (fpm.isReady())
-  {
-    fpm.run();
-  };
- 
-  if (kpm.isReady())
-  {
-    kpm.handleKey();
-  };
-  
+	if (am.isReady())
+	{
+		am.handleInterrupt();
+		am.printNewData();
+		am.clearInterrupt();
+	};
+
+	if (fpm.isReady())
+	{
+		fpm.run();
+	};
+
+	if (kpm.isReady())
+	{
+		kpm.handleKey();
+	};
+
 	if (sm.isReady())
 	{
 		sm.run();
 	}
-
-  sd_power_mode_set(NRF_POWER_MODE_LOWPWR);
-  __WFI();
-  waitForEvent();
+	//	sd_power_mode_set(NRF_POWER_MODE_LOWPWR);
+	__WFI();
+	waitForEvent();
 }

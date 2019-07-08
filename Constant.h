@@ -4,7 +4,8 @@
 #define PASSCODE_MAX_COUNT 10
 #define PASSCODE_LENGTH 5
 #define MAX_DELAY_TIME_BETWEEN_KEYS 2000
-#define BLUETOOH_PASSCODE_LENGTH 5
+#define BLUETOOTH_PASSCODE_MAX_LENGTH 15
+#define MAX_PRPH_CONNECTION 5
 #define STARTED_VALUE 9876
 #define MCP_ADDR 0x20
 #define SERIAL_FREQ 115200
@@ -12,18 +13,21 @@
 #define COUNT_FOR_ORIENTATION_READING 100 // Accelerometer reads with freq of 100Hz in active mode and 6.25Hz in standby mode
 #define WAIT_TIME_FOR_FIRST_FINGERPRINT 1500
 #define WAIT_TIME_FOR_SECOND_FINGERPRINT 10000
+#define SIGNAL_STRENGTH -8
+#define SIGNAL_NAME "MiD-0000001"
 #define FILE_DATA "/data"
 
 // Pins configuration
 #define PIN_FINGERPRINT_YELLOW A5
 #define PIN_ACCELEROMETER_INT A1
 #define PIN_KEYPAD_INT A0
-#define PIN_LED_RED g_ADigitalPinMap[5]
-#define PIN_LED_GREEN g_ADigitalPinMap[6]
-#define PIN_LED_BLUE g_ADigitalPinMap[9]
+#define PIN_LED_RED 5
+#define PIN_LED_GREEN 6
+#define PIN_LED_BLUE 9
 #define PIN_MOTOR A2
 #define PIN_BACK_BUTTON A4
 #define PIN_FRONT_SWITCH A3
+#define PIN_BLUETOOTH_BUTTON 13
 
 // Status code configuration
 #define SUCCESS 0

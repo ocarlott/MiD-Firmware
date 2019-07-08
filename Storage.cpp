@@ -19,16 +19,33 @@ uint8_t Storage::setup()
 	{
 		file.close();
 		this->cw.kcm.numberOfKeyCodes = 0;
-		this->cw.bluetoothPasscode = 12345;
 		this->cw.fpm.numberOfFingerprints = 0;
 		for (uint8_t i = 0; i < PASSCODE_MAX_COUNT; i++)
 		{
 			this->cw.kcm.codes[i] = 0;
 		}
 		this->addKeyCode(12345);
-		for (uint8_t i = i; i < FINGERPRINT_MAX_COUNT; i++)
+		for (uint8_t i = 0; i < FINGERPRINT_MAX_COUNT; i++)
 		{
 			this->cw.fpm.ids[i] = 0;
+		}
+		for (uint8_t i = 0; i < BLUETOOTH_PASSCODE_MAX_LENGTH; i++)
+		{
+			switch (i)
+			{
+			case 0:
+				this->cw.bluetoothPasscode[i] = 'M';
+				break;
+			case 1:
+				this->cw.bluetoothPasscode[i] = 'i';
+				break;
+			case 2:
+				this->cw.bluetoothPasscode[i] = 'D';
+				break;
+			default:
+				this->cw.bluetoothPasscode[i] = 0;
+				break;
+			}
 		}
 		DEBUG.println("Initialize configuration data!");
 		this->save();
@@ -36,9 +53,13 @@ uint8_t Storage::setup()
 	return SUCCESS;
 }
 
-uint8_t Storage::getBlueCode(uint32_t *returnValue)
+uint8_t Storage::getBlueCode(uint8_t *returnValue)
 {
-	*returnValue = this->cw.bluetoothPasscode;
+	for (uint8_t i = 0; i < BLUETOOTH_PASSCODE_MAX_LENGTH; i++)
+	{
+		*returnValue = this->cw.bluetoothPasscode[i];
+		returnValue++;
+	}
 	return SUCCESS;
 }
 
@@ -70,11 +91,28 @@ uint8_t Storage::save()
 	return SUCCESS;
 }
 
-uint8_t Storage::setBlueCode(uint32_t blueCode)
+uint8_t Storage::setBlueCode(uint8_t *blueCode)
 {
-	this->cw.bluetoothPasscode = blueCode;
+	for (uint8_t i = 0; i < BLUETOOTH_PASSCODE_MAX_LENGTH; i++)
+	{
+		this->cw.bluetoothPasscode[i] = *blueCode;
+    blueCode++;
+	}
 	this->save();
 	return SUCCESS;
+}
+
+bool Storage::checkBlueCode(uint8_t *blueCode)
+{
+	for (uint8_t i = 0; i < BLUETOOTH_PASSCODE_MAX_LENGTH; i++)
+	{
+		if (this->cw.bluetoothPasscode[i] != *blueCode)
+		{
+			return false;
+		}
+   blueCode++;
+	}
+	return true;
 }
 
 uint8_t Storage::addKeyCode(uint32_t keyCode, uint8_t *returnId)
@@ -107,7 +145,7 @@ uint8_t Storage::removeKeyCode(uint8_t id)
 
 bool Storage::checkPasscode(uint32_t passcode)
 {
-  DEBUG.print("Passcode to check: ", passcode);
+	DEBUG.print("Passcode to check: ", passcode);
 	for (uint8_t i = 0; i < PASSCODE_MAX_COUNT; i++)
 	{
 		DEBUG.print("Current passcode: ", this->cw.kcm.codes[i]);
