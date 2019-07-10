@@ -62,7 +62,7 @@ void setup()
 	//	NRF_PWM2->ENABLE = 0;
 	//	NRF_SAADC->ENABLE = 0;
 	uint8_t data[15] = {77, 105, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	ble.setup(&storage);
+	ble.setup(&storage, &lock);
 	ble.configureServices();
 	Serial.println("Done setup!");
 }

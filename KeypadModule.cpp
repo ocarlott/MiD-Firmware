@@ -13,6 +13,7 @@ KeypadModule::KeypadModule(class Storage *s, class Lock *l) : storage(s), lock(l
 		this->passcode[i] = -1;
 	}
 	KeypadModule::ready = false;
+  this->startEnteringPasscode = false;
 }
 
 uint8_t KeypadModule::setup()
@@ -114,60 +115,121 @@ uint8_t KeypadModule::disable()
 
 uint8_t KeypadModule::handleKey()
 {
-	if (this->enabled)
-	{
-		this->disable();
-		uint8_t key;
-		this->getKey(&key);
-		if (key != NO_KEY)
-		{
-			DEBUG.print("Current key: ", key);
-			unsigned long currentTime = millis();
-			switch (key)
-			{
-			case KEY_STAR:
-				if (!this->lock->isOpened())
+    this->disable();
+    uint8_t key;
+    this->getKey(&key);
+    if (key != NO_KEY)
+    {
+      DEBUG.print("Current key: ", key);
+      unsigned long currentTime = millis();
+      switch (key)
+      {
+      case KEY_STAR:
+        if (!this->lock->isOpened())
         {
           this->currentIndex = 0;
         }
-				break;
-			case KEY_POUND:
-				if (this->lock->isOpened())
-				{
-					this->lock->lock();
-				}
-				else
-				{
-					uint32_t passcode;
-					this->getComputedPasscode(&passcode);
-					this->lock->openIfTrue(this->storage->checkPasscode(passcode));
-				}
-				this->currentIndex = 0;
-				break;
-			default:
+        this->startEnteringPasscode = true;
+        break;
+      case KEY_POUND:
+        if (this->startEnteringPasscode)
+        {
+          if (this->lock->isOpened())
+          {
+            this->lock->lock();
+          }
+          else
+          {
+            uint32_t passcode;
+            this->getComputedPasscode(&passcode);
+            this->lock->openIfTrue(this->storage->checkPasscode(passcode));
+            if (this->lock->isOpened())
+            {
+              this->startEnteringPasscode = false;
+            }
+          }
+          this->currentIndex = 0;
+        }
+        else
+        {
+          this->lock->lock();
+        }
+        break;
+      default:
         if (!this->lock->isOpened())
         {
-  				if ((currentTime - this->lastTime <= MAX_DELAY_TIME_BETWEEN_KEYS))
-  				{
-  					if (this->currentIndex < PASSCODE_LENGTH)
-  					{
-  						this->passcode[this->currentIndex++] = key;
-  					}
-  				}
-  				else
-  				{
-  					this->currentIndex = 0;
-  					this->passcode[this->currentIndex++] = key;
-  				}
+          if ((currentTime - this->lastTime <= MAX_DELAY_TIME_BETWEEN_KEYS))
+          {
+            if (this->currentIndex < PASSCODE_LENGTH)
+            {
+              this->passcode[this->currentIndex++] = key;
+            }
+          }
+          else
+          {
+            this->currentIndex = 0;
+            this->passcode[this->currentIndex++] = key;
+          }
         }
-				break;
-			}
-			this->lastTime = currentTime;
-		}
-		this->enable();
-	}
+        break;
+      }
+      this->lastTime = currentTime;
+    }
+    DEBUG.println("Get here!");
+    this->enable();
+//	if (this->enabled)
+//	{
+//		this->disable();
+//		uint8_t key;
+//		this->getKey(&key);
+//		if (key != NO_KEY)
+//		{
+//			DEBUG.print("Current key: ", key);
+//			unsigned long currentTime = millis();
+//			switch (key)
+//			{
+//			case KEY_STAR:
+//				if (!this->lock->isOpened())
+//        {
+//          this->currentIndex = 0;
+//        }
+//				break;
+//			case KEY_POUND:
+//				if (this->lock->isOpened())
+//				{
+//					this->lock->lock();
+//				}
+//				else
+//				{
+//					uint32_t passcode;
+//					this->getComputedPasscode(&passcode);
+//					this->lock->openIfTrue(this->storage->checkPasscode(passcode));
+//				}
+//				this->currentIndex = 0;
+//				break;
+//			default:
+//        if (!this->lock->isOpened())
+//        {
+//  				if ((currentTime - this->lastTime <= MAX_DELAY_TIME_BETWEEN_KEYS))
+//  				{
+//  					if (this->currentIndex < PASSCODE_LENGTH)
+//  					{
+//  						this->passcode[this->currentIndex++] = key;
+//  					}
+//  				}
+//  				else
+//  				{
+//  					this->currentIndex = 0;
+//  					this->passcode[this->currentIndex++] = key;
+//  				}
+//        }
+//				break;
+//			}
+//			this->lastTime = currentTime;
+//		}
+//		this->enable();
+//	}
 	KeypadModule::ready = false;
-  DEBUG.println("Got here!");
 	return SUCCESS;
 }
 

@@ -58,7 +58,10 @@ uint8_t Lock::addEventListener(callback_t oC, callback_t cC)
 
 uint8_t Lock::lock()
 {
-	this->motorModule->turnToClosePosition();
-	this->isLocked = true;
-	this->closeCallback();
+	if (!this->isLocked)
+  {
+    this->motorModule->turnToClosePosition();
+    this->isLocked = true;
+    this->closeCallback();
+  }
 }

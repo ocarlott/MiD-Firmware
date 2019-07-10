@@ -6,6 +6,12 @@ volatile bool BluetoothModule::bondingEnabled;
 
 class Storage *BluetoothModule::storage;
 
+class Lock *BluetoothModule::lock;
+
+uint8_t BluetoothModule::rssiIndex;
+
+int8_t BluetoothModule::rssi[10];
+
 BluetoothModule::BluetoothModule()
 {
 	this->txPower = SIGNAL_STRENGTH;
@@ -20,18 +26,25 @@ BluetoothModule::BluetoothModule()
 	this->alertData = new BLECharacteristic(0x9e124dde2782417388af53ff143fee2);
 	this->bleConfig = new BLEService(0x9e124dde2782417388af53ff143fef1);
 	this->configData = new BLECharacteristic(0x9e124dde2782417388af53ff143fef2);
+  BluetoothModule::rssiIndex = 0;
+  for (uint8_t i = 0; i < 10; i++)
+  {
+    BluetoothModule::rssi[i] = CUT_OFF_THRESHOLD;
+  }
 	BluetoothModule::bondingEnabled = false;
 };
 
-uint8_t BluetoothModule::setup(class Storage *s)
+uint8_t BluetoothModule::setup(class Storage *s, class Lock *l)
 {
 	BluetoothModule::storage = s;
+  BluetoothModule::lock = l;
 	this->bluefruit->autoConnLed(false);
 	this->bluefruit->begin(3, 0);
 	this->bluefruit->setTxPower(this->txPower);
 	this->bluefruit->setName(this->name);
 	this->bluefruit->Periph.setConnectCallback(BluetoothModule::connectedCallback);
 	this->bluefruit->Periph.setDisconnectCallback(BluetoothModule::disconnectedCallback);
+  this->bluefruit->setRssiCallback(BluetoothModule::rssiChanged);
 	bond_clear_all();
 };
 
@@ -81,7 +94,6 @@ uint8_t BluetoothModule::startAdvertising()
 	this->bluefruit->Advertising.setInterval(32, 244);
 	this->bluefruit->Advertising.setFastTimeout(30);
 	this->bluefruit->Advertising.start(0);
-	Serial.println("Started Advertising!");
 };
 
 uint8_t BluetoothModule::stopAdvertising()
@@ -96,6 +108,7 @@ void BluetoothModule::connectedCallback(uint16_t conn_handle)
 
 	char central_name[32] = {0};
 	connection->getPeerName(central_name, sizeof(central_name));
+  connection->monitorRssi(2);
 
 	Serial.print("Connected to ");
 	Serial.println(central_name);
@@ -123,6 +136,8 @@ void BluetoothModule::disconnectedCallback(uint16_t conn_handle, uint8_t reason)
 	BluetoothModule::connectionCount--;
 	Serial.print("Connection count: ");
 	Serial.println(BluetoothModule::connectionCount);
+  Bluefruit.Advertising.stop();
+  BluetoothModule::lock->lock();
 };
 
 void BluetoothModule::handleAuth(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len)
@@ -151,4 +166,27 @@ void BluetoothModule::handleAuth(uint16_t conn_hdl, BLECharacteristic *chr, uint
 			Serial.println("Passcode is not correct!");
 		}
 	}
+}
+
+void BluetoothModule::rssiChanged(uint16_t conn_hdl, int8_t rssi)
+{
+  BluetoothModule::rssi[BluetoothModule::rssiIndex++] = rssi;
+  if (BluetoothModule::rssiIndex == 10)
+  {
+    BluetoothModule::rssiIndex = 0;
+  }
+  int8_t total = 0;
+  for (uint8_t i = 0; i < 10; i++)
+  {
+    total += BluetoothModule::rssi[i];
+  }
+  total = total / 10;
+  if (CUT_OFF_THRESHOLD - total > 4)
+  {
+    BLEConnection *connection = Bluefruit.Connection(conn_hdl);
+    connection->stopRssi();
+    Serial.println("User went too far!");
+    Bluefruit.Advertising.stop();
+    BluetoothModule::lock->lock();
+  }
 }

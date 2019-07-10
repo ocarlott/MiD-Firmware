@@ -22,6 +22,7 @@ class KeypadModule : public WiredDevice
 	char passcode[PASSCODE_LENGTH];
 	static void isr();
 	static volatile bool ready;
+  volatile bool startEnteringPasscode;
 
   public:
 	KeypadModule(class Storage *s, class Lock *l);

@@ -13,7 +13,8 @@
 #define COUNT_FOR_ORIENTATION_READING 100 // Accelerometer reads with freq of 100Hz in active mode and 6.25Hz in standby mode
 #define WAIT_TIME_FOR_FIRST_FINGERPRINT 1500
 #define WAIT_TIME_FOR_SECOND_FINGERPRINT 10000
-#define SIGNAL_STRENGTH -8
+#define SIGNAL_STRENGTH -40
+#define CUT_OFF_THRESHOLD -65
 #define SIGNAL_NAME "MiD-0000001"
 #define FILE_DATA "/data"
 
