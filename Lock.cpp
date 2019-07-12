@@ -1,22 +1,28 @@
 #include "Lock.h"
+#include "Debug.h"
+#include "MotorModule.h"
+#include "Notification.h"
 
-Lock::Lock(class MotorModule *m) : motorModule(m)
+uint8_t Lock::setup(class Debug *d, class Notification *n, class MotorModule *m)
 {
+	DEBUG = d;
+	NOTIFIER = n;
+	MOTOR = m;
 	this->isLocked = true;
-};
+}
 
 void Lock::openIfTrue(bool condition)
 {
 	if (condition)
 	{
-		this->motorModule->turnToOpenPosition();
+		MOTOR->turnToOpenPosition();
 		this->isLocked = false;
 		this->openCallback();
-		NOTIFIER.alertSuccess("Opening the door!");
+		NOTIFIER->alertSuccess("Opening the door!");
 	}
 	else
 	{
-		NOTIFIER.alertFailure("Wrong credentials!");
+		NOTIFIER->alertFailure("Wrong credentials!");
 	}
 };
 
@@ -29,17 +35,17 @@ uint8_t Lock::toggleState()
 {
 	if (this->isLocked)
 	{
-		this->motorModule->turnToOpenPosition();
+		MOTOR->turnToOpenPosition();
 		this->isLocked = false;
 		this->openCallback();
-		NOTIFIER.alertSuccess("Opened with back button!");
+		NOTIFIER->alertSuccess("Opened with back button!");
 	}
 	else
 	{
-		this->motorModule->turnToClosePosition();
+		MOTOR->turnToClosePosition();
 		this->isLocked = true;
 		this->closeCallback();
-		NOTIFIER.alertSuccess("Closed with back button!");
+		NOTIFIER->alertSuccess("Closed with back button!");
 	}
 };
 
@@ -59,9 +65,9 @@ uint8_t Lock::addEventListener(callback_t oC, callback_t cC)
 uint8_t Lock::lock()
 {
 	if (!this->isLocked)
-  {
-    this->motorModule->turnToClosePosition();
-    this->isLocked = true;
-    this->closeCallback();
-  }
+	{
+		MOTOR->turnToClosePosition();
+		this->isLocked = true;
+		this->closeCallback();
+	}
 }

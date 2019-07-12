@@ -2,18 +2,17 @@
 #define SWITCHMODULE_H
 
 #include <Arduino.h>
-#include "KeypadModule.h"
-#include "Lock.h"
-#include "Notification.h"
-#include "BluetoothModule.h"
+#include "Constant.h"
 
-extern Notification NOTIFIER;
+class BluetoothModule;
+class Debug;
+class Lock;
 
 class SwitchModule
 {
   public:
-	SwitchModule(class Lock *l, class BluetoothModule *b);
-	uint8_t setup();
+	SwitchModule();
+	uint8_t setup(class Debug *d, class BluetoothModule *b, class Lock *l);
 	bool isReady();
 	uint8_t run();
 	uint8_t enableFrontSwitch();
@@ -27,14 +26,15 @@ class SwitchModule
 	uint8_t frontSwitchEventHandler();
 	uint8_t backButtonEventHandler();
 	uint8_t bluetoothButtonHandler();
+	class BluetoothModule *BLE;
+	class Debug *DEBUG;
+	class Lock *LOCK;
 	static void frontSwitchISR();
 	static void backButtonISR();
 	static void bluetoothButtonISR();
 	static volatile bool frontSwitchTriggered;
 	static volatile bool backButtonPressed;
 	static volatile bool bluetoothButtonPressed;
-	class Lock *lock;
-	class BluetoothModule *blm;
 };
 
 #endif

@@ -1,23 +1,23 @@
 #ifndef MOTORMODULE_H
 #define MOTORMODULE_H
 
-#include <variant.h>
-#include <HardwarePWM.h>
-#include <Servo.h>
 #include <Arduino.h>
 #include "Constant.h"
-#include "Debug.h"
+#include <HardwarePWM.h>
+#include <Servo.h>
 
-extern Debug DEBUG;
+class Debug;
 
 class MotorModule
 {
   private:
 	class Servo *motor;
+	class Debug *DEBUG;
 
   public:
 	MotorModule();
 	~MotorModule();
+	uint8_t setup(class Debug *d);
 	uint8_t getAngle(uint8_t *angle);
 	uint8_t turnTo(uint8_t degree);
 	uint8_t turnToOpenPosition();

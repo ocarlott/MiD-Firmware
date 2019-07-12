@@ -5,23 +5,22 @@
 #include "Constant.h"
 #include "Debug.h"
 
-extern Debug DEBUG;
-
 class Notification
 {
   public:
-	uint8_t setup()
+	uint8_t setup(class Debug *d)
 	{
+		DEBUG = d;
 		pinMode(PIN_LED_RED, OUTPUT);
 		pinMode(PIN_LED_GREEN, OUTPUT);
 		pinMode(PIN_LED_BLUE, OUTPUT);
-		DEBUG.println("Finished setting up Notification");
+		DEBUG->println("Finished setting up Notification");
 		return SUCCESS;
 	};
 
 	uint8_t alertSuccess(char *msg)
 	{
-		DEBUG.println(msg);
+		DEBUG->println(msg);
 		digitalWrite(PIN_LED_GREEN, HIGH);
 		delay(1000);
 		digitalWrite(PIN_LED_GREEN, LOW);
@@ -30,7 +29,7 @@ class Notification
 
 	uint8_t alertFailure(char *msg)
 	{
-		DEBUG.println(msg);
+		DEBUG->println(msg);
 		digitalWrite(PIN_LED_RED, HIGH);
 		delay(1000);
 		digitalWrite(PIN_LED_RED, LOW);
@@ -44,7 +43,7 @@ class Notification
 		delay(1000);
 		digitalWrite(PIN_LED_GREEN, LOW);
 		digitalWrite(PIN_LED_RED, LOW);
-		DEBUG.println(msg);
+		DEBUG->println(msg);
 		return SUCCESS;
 	};
 
@@ -53,9 +52,17 @@ class Notification
 		digitalWrite(PIN_LED_BLUE, HIGH);
 		delay(1000);
 		digitalWrite(PIN_LED_BLUE, LOW);
-		DEBUG.println(msg);
+		DEBUG->println(msg);
 		return SUCCESS;
 	};
+
+	uint8_t broadcastBatteryLevel()
+	{
+		uint32_t bl = analogRead(A6);
+	}
+
+  private:
+	class Debug *DEBUG;
 };
 
 #endif

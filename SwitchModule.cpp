@@ -1,18 +1,24 @@
 #include "SwitchModule.h"
+#include "BluetoothModule.h"
+#include "Debug.h"
+#include "Lock.h"
 
 volatile bool SwitchModule::frontSwitchTriggered;
 volatile bool SwitchModule::backButtonPressed;
 volatile bool SwitchModule::bluetoothButtonPressed;
 
-SwitchModule::SwitchModule(class Lock *l, class BluetoothModule *b) : lock(l), blm(b)
+SwitchModule::SwitchModule()
 {
 	SwitchModule::backButtonPressed = false;
 	SwitchModule::frontSwitchTriggered = false;
 	SwitchModule::bluetoothButtonPressed = false;
 }
 
-uint8_t SwitchModule::setup()
+uint8_t SwitchModule::setup(class Debug *d, class BluetoothModule *b, class Lock *l)
 {
+	BLE = b;
+	DEBUG = d;
+	LOCK = l;
 	pinMode(PIN_BACK_BUTTON, INPUT_PULLUP);
 	pinMode(PIN_FRONT_SWITCH, INPUT_PULLUP);
 	pinMode(PIN_BLUETOOTH_BUTTON, INPUT_PULLUP);
@@ -60,9 +66,9 @@ void SwitchModule::bluetoothButtonISR()
 
 uint8_t SwitchModule::frontSwitchEventHandler()
 {
-	DEBUG.println("Handling front switch trigger!");
+	DEBUG->println("Handling front switch trigger!");
 	disableFrontSwitch();
-	lock->openWithKey();
+	LOCK->openWithKey();
 	SwitchModule::frontSwitchTriggered = false;
 	enableFrontSwitch();
 	return SUCCESS;
@@ -94,9 +100,9 @@ uint8_t SwitchModule::disableBluetoothButton()
 
 uint8_t SwitchModule::bluetoothButtonHandler()
 {
-	DEBUG.println("Handling Bluetooth Button press!");
+	DEBUG->println("Handling Bluetooth Button press!");
 	disableBluetoothButton();
-	blm->enableBonding();
+	BLE->enableBonding();
 	SwitchModule::bluetoothButtonPressed = false;
 	enableBluetoothButton();
 	return SUCCESS;
@@ -104,9 +110,9 @@ uint8_t SwitchModule::bluetoothButtonHandler()
 
 uint8_t SwitchModule::backButtonEventHandler()
 {
-	DEBUG.println("Handling Back Button press!");
+	DEBUG->println("Handling Back Button press!");
 	disableBackButton();
-	lock->toggleState();
+	LOCK->toggleState();
 	SwitchModule::backButtonPressed = false;
 	enableBackButton();
 	return SUCCESS;

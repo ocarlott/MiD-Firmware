@@ -2,21 +2,21 @@
 #define STORAGE_H
 
 #include <Arduino.h>
-#include "Type.h"
 #include "Constant.h"
-#include "Debug.h"
+#include "Type.h"
 #include <Adafruit_LittleFS.h>
 #include <InternalFileSystem.h>
 
-extern Debug DEBUG;
+class Debug;
 
 class Storage
 {
   private:
 	struct CredentialsWrapper cw;
+	class Debug *DEBUG;
 
   public:
-	uint8_t setup();
+	uint8_t setup(class Debug *d);
 	uint8_t getBlueCode(uint8_t *returnValue);
 	uint8_t getPasscode(uint8_t id, uint32_t *passcode);
 	uint8_t save();

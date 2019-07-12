@@ -1,14 +1,13 @@
 #ifndef KEYPAD_MODULE_H
 #define KEYPAD_MODULE_H
 
+#include <Arduino.h>
 #include "Constant.h"
-#include "Storage.h"
-#include "Lock.h"
-#include "Type.h"
-#include "Debug.h"
 #include "WiredDevice.h"
 
-extern Debug DEBUG;
+class Debug;
+class Storage;
+class Lock;
 
 class KeypadModule : public WiredDevice
 {
@@ -17,16 +16,17 @@ class KeypadModule : public WiredDevice
 	unsigned long lastTime;
 	unsigned long currentIndex;
 	bool enabled;
-	class Storage *storage;
-	class Lock *lock;
 	char passcode[PASSCODE_LENGTH];
 	static void isr();
 	static volatile bool ready;
-  volatile bool startEnteringPasscode;
+	volatile bool startEnteringPasscode;
+	class Debug *DEBUG;
+	class Storage *STORAGE;
+	class Lock *LOCK;
 
   public:
-	KeypadModule(class Storage *s, class Lock *l);
-	uint8_t setup();
+	KeypadModule();
+	uint8_t setup(class Debug *d, class Storage *st, class Lock *l);
 	uint8_t handleKey();
 	uint8_t enable();
 	uint8_t disable();

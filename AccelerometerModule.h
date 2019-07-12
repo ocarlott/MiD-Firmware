@@ -1,14 +1,12 @@
 #ifndef ACCELEROMETERMODULE_H
 #define ACCELEROMETERMODULE_H
 
+#include <Arduino.h>
 #include "Constant.h"
 #include "WiredDevice.h"
-#include <Arduino.h>
-#include "Debug.h"
-#include "Notification.h"
 
-extern Debug DEBUG;
-extern Notification NOTIFIER;
+class Debug;
+class Notification;
 
 class AccelerometerModule : public WiredDevice
 {
@@ -22,13 +20,15 @@ class AccelerometerModule : public WiredDevice
 	bool enabled;
 	int16_t x, y, z;
 	uint8_t enableInterrupt(uint8_t value);
+	class Debug *DEBUG;
+	class Notification *NOTIFIER;
 
   public:
 	AccelerometerModule();
 	uint8_t read();
 	uint8_t enable();
 	uint8_t disable();
-	uint8_t setup(uint8_t addr = AM_DEFAULT_ADDRESS);
+	uint8_t setup(class Debug *d, class Notification *n, uint8_t addr = AM_DEFAULT_ADDRESS);
 	uint8_t setThresholdForKnockDetection(uint8_t x_th, uint8_t y_th, uint16_t z_th); // 0 - 100 (0 - 4g)
 	uint8_t setAxisForKnockDetection(bool x = true, bool y = true, bool z = true);
 	uint8_t setThresholdForMotionDetection(uint8_t threshold); // 0 - 100 (coresponding for 0 to 4g)

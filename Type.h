@@ -22,4 +22,26 @@ struct CredentialsWrapper
 	uint8_t bluetoothPasscode[BLUETOOTH_PASSCODE_MAX_LENGTH];
 };
 
+enum Module
+{
+	Fingerprint_M = 1,
+	Keypad_M = 2,
+	Key_M = 3,
+	BackButton_M = 4,
+	Accelerometer_M = 5
+};
+
+enum Action
+{
+	Open_A = 1,
+	Close_A = 2
+};
+
+enum Status
+{
+	Triggered = 1,
+	Failed = 2,
+	Error = 3
+};
+
 #endif

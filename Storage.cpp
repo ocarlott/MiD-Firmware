@@ -1,17 +1,17 @@
 #include "Storage.h"
-#include <InternalFileSystem.h>
-#include <Adafruit_LittleFS.h>
+#include "Debug.h"
 
 using namespace Adafruit_LittleFS_Namespace;
 
-uint8_t Storage::setup()
+uint8_t Storage::setup(class Debug *d)
 {
+	DEBUG = d;
 	File file(InternalFS);
 	InternalFS.begin();
 	file.open(FILE_DATA, FILE_O_READ);
 	if (file)
 	{
-		DEBUG.println("Loading configuration data!");
+		DEBUG->println("Loading configuration data!");
 		file.read(&this->cw, sizeof(this->cw));
 		file.close();
 	}
@@ -47,7 +47,7 @@ uint8_t Storage::setup()
 				break;
 			}
 		}
-		DEBUG.println("Initialize configuration data!");
+		DEBUG->println("Initialize configuration data!");
 		this->save();
 	}
 	return SUCCESS;
@@ -82,11 +82,11 @@ uint8_t Storage::save()
 	{
 		file.write((uint8_t *)(&this->cw), (uint16_t)sizeof(this->cw));
 		file.close();
-		DEBUG.println("Saved data in Storage class!");
+		DEBUG->println("Saved data in Storage class!");
 	}
 	else
 	{
-		DEBUG.println("Failed to create file to write!");
+		DEBUG->println("Failed to create file to write!");
 	}
 	return SUCCESS;
 }
@@ -96,7 +96,7 @@ uint8_t Storage::setBlueCode(uint8_t *blueCode)
 	for (uint8_t i = 0; i < BLUETOOTH_PASSCODE_MAX_LENGTH; i++)
 	{
 		this->cw.bluetoothPasscode[i] = *blueCode;
-    blueCode++;
+		blueCode++;
 	}
 	this->save();
 	return SUCCESS;
@@ -106,11 +106,14 @@ bool Storage::checkBlueCode(uint8_t *blueCode)
 {
 	for (uint8_t i = 0; i < BLUETOOTH_PASSCODE_MAX_LENGTH; i++)
 	{
+		Serial.printf("Char: %d\n", *blueCode);
+		Serial.printf("Key: %d\n", this->cw.bluetoothPasscode[i]);
 		if (this->cw.bluetoothPasscode[i] != *blueCode)
 		{
+			DEBUG->print("Failed at index: ", i);
 			return false;
 		}
-   blueCode++;
+		blueCode++;
 	}
 	return true;
 }
@@ -124,7 +127,7 @@ uint8_t Storage::addKeyCode(uint32_t keyCode, uint8_t *returnId)
 			this->cw.kcm.codes[i] = keyCode;
 			this->cw.kcm.numberOfKeyCodes++;
 			*returnId = i;
-			DEBUG.print("This passcode has been added: ", keyCode);
+			DEBUG->print("This passcode has been added: ", keyCode);
 			this->save();
 			return SUCCESS;
 		}
@@ -145,10 +148,10 @@ uint8_t Storage::removeKeyCode(uint8_t id)
 
 bool Storage::checkPasscode(uint32_t passcode)
 {
-	DEBUG.print("Passcode to check: ", passcode);
+	DEBUG->print("Passcode to check: ", passcode);
 	for (uint8_t i = 0; i < PASSCODE_MAX_COUNT; i++)
 	{
-		DEBUG.print("Current passcode: ", this->cw.kcm.codes[i]);
+		DEBUG->print("Current passcode: ", this->cw.kcm.codes[i]);
 		if (this->cw.kcm.codes[i] == passcode)
 		{
 			return true;

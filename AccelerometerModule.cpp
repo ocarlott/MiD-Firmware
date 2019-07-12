@@ -1,4 +1,6 @@
 #include "AccelerometerModule.h"
+#include "Debug.h"
+#include "Notification.h"
 
 #define putDeviceInStandByMode writeRegister(AM_REG_CTRL_REG1, readRegister(AM_REG_CTRL_REG1) & 0xFE)
 #define putDeviceInActiveMode writeRegister(AM_REG_CTRL_REG1, readRegister(AM_REG_CTRL_REG1) | 1)
@@ -12,10 +14,10 @@ AccelerometerModule::AccelerometerModule()
 	thresholdForKnock = 12;
 	AccelerometerModule::ready = false;
 	lastAlertTime = 0;
-  this->addr = AM_DEFAULT_ADDRESS;
+	this->addr = AM_DEFAULT_ADDRESS;
 }
 
-uint8_t AccelerometerModule::setup(uint8_t addr)
+uint8_t AccelerometerModule::setup(class Debug *d, class Notification *n, uint8_t addr)
 {
 	Wire.begin();
 	this->addr = addr;
@@ -24,7 +26,7 @@ uint8_t AccelerometerModule::setup(uint8_t addr)
 	readRegister(AM_REG_WHOAMI, &deviceId);
 	if (deviceId != 0x1A)
 	{
-		DEBUG.println("Acclerometer Sensor is not detected!");
+		DEBUG->println("Acclerometer Sensor is not detected!");
 		return FAILED;
 	}
 	writeRegister(AM_REG_CTRL_REG2, 0x40); // Reset software stack
@@ -36,7 +38,7 @@ uint8_t AccelerometerModule::setup(uint8_t addr)
 	// Put device in standby mode to modify registers' values
 	putDeviceInStandByMode;
 	// Enable Auto Sleep/Wake
-	// Wake - High resolution for oversampling. Sleep - Low power Low Noise.
+	// Wake - High resolution for oversamplin Sleep - Low power Low Noise.
 	writeRegister(AM_REG_CTRL_REG2, 0x0E);
 	// Set which interrupts can wake up the device, interrupt active high
 	writeRegister(AM_REG_CTRL_REG3, 0x3A);
@@ -64,7 +66,7 @@ uint8_t AccelerometerModule::setup(uint8_t addr)
 	enableMotionDetection();
 	enableLandscapeChangeDetection();
 	enable();
-	DEBUG.println("Finished setting up acclerometer sensor!");
+	DEBUG->println("Finished setting up acclerometer sensor!");
 	return SUCCESS;
 }
 
@@ -231,10 +233,10 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 		readRegister(AM_INT_SOURCE, &source);
 		if (source == 0)
 		{
-      this->enable();
+			this->enable();
 			return FAILED;
 		}
-		DEBUG.print("Interrupt source reg: ", source);
+		DEBUG->print("Interrupt source reg: ", source);
 		uint8_t pl;
 		readRegister(AM_REG_PL_STATUS, &pl);
 		uint8_t knock;
@@ -243,7 +245,7 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 		readRegister(AM_REG_FF_MT_SRC, &motion);
 		uint8_t mode;
 		readRegister(AM_REG_SYSMOD, &mode);
-		DEBUG.print("System current mode: ", mode);
+		DEBUG->print("System current mode: ", mode);
 		if (source & 0x10)
 		{
 			if (pl & 0x80)
@@ -251,7 +253,7 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 				uint64_t time = millis() % AM_DEBOUNCE_MAX;
 				if (time - lastAlertTime > deboundCounterNotification)
 				{
-					NOTIFIER.alertWarning("Landscape change detected!");
+					NOTIFIER->alertWarning("Landscape change detected!");
 					lastAlertTime = time;
 				}
 				if (origin != NULL)
@@ -267,19 +269,19 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 			{
 				if (knock & 0x90 == 0x90)
 				{
-					NOTIFIER.alertWarning("Knock in X direction.");
+					NOTIFIER->alertWarning("Knock in X direction.");
 				}
 				else if (knock & 0xC0 == 0xC0)
 				{
-					NOTIFIER.alertWarning("Knock in Z direction.");
+					NOTIFIER->alertWarning("Knock in Z direction.");
 				}
 				else if (knock & 0xA0)
 				{
-					NOTIFIER.alertWarning("Knock in Y direction.");
+					NOTIFIER->alertWarning("Knock in Y direction.");
 				}
 				else
 				{
-					NOTIFIER.alertWarning("Should not happen!");
+					NOTIFIER->alertWarning("Should not happen!");
 					lastAlertTime = time;
 					if (origin != NULL)
 					{
@@ -300,7 +302,7 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 			{
 				if (!(motion & 0x80))
 				{
-					NOTIFIER.alertWarning("Error detecting motion!");
+					NOTIFIER->alertWarning("Error detecting motion!");
 					if (origin != NULL)
 					{
 						*origin = AM_ERROR_INT;
@@ -309,15 +311,15 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 				}
 				else if (motion & 0x30)
 				{
-					NOTIFIER.alertWarning("Motion in Z direction detected!");
+					NOTIFIER->alertWarning("Motion in Z direction detected!");
 				}
 				else if (motion & 0x0C)
 				{
-					NOTIFIER.alertWarning("Motion in Y direction detected");
+					NOTIFIER->alertWarning("Motion in Y direction detected");
 				}
 				else if (motion & 0x03)
 				{
-					NOTIFIER.alertWarning("Motion in X direction detected");
+					NOTIFIER->alertWarning("Motion in X direction detected");
 				}
 				lastAlertTime = time;
 				if (origin != NULL)
@@ -328,7 +330,7 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 		}
 		else if (source & 0x80)
 		{
-			DEBUG.println("Sleep/Wake interrupt");
+			DEBUG->println("Sleep/Wake interrupt");
 			if (origin != NULL)
 			{
 				*origin = AM_SLEEP_INT;
@@ -336,7 +338,7 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 		}
 		else if (source & 1 == 1)
 		{
-			DEBUG.println("Data ready interrupt");
+			DEBUG->println("Data ready interrupt");
 			if (origin != NULL)
 			{
 				*origin = AM_DATA_INT;
@@ -349,18 +351,18 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 		this->enable();
 	}
 	if (*origin == AM_ERROR_INT)
-  {
-    return FAILED;
-  }
-  return SUCCESS;
+	{
+		return FAILED;
+	}
+	return SUCCESS;
 }
 
 uint8_t AccelerometerModule::printNewData()
 {
 	read();
-	DEBUG.print("New x value: ", (uint16_t)(x * AM_OUTPUT_SCALE / divider), " mg");
-	DEBUG.print("New y value: ", (uint16_t)(y * AM_OUTPUT_SCALE / divider), " mg");
-	DEBUG.print("New z value: ", (uint16_t)(z * AM_OUTPUT_SCALE / divider), " mg");
+	DEBUG->print("New x value: ", (uint16_t)(x * AM_OUTPUT_SCALE / divider), " mg");
+	DEBUG->print("New y value: ", (uint16_t)(y * AM_OUTPUT_SCALE / divider), " mg");
+	DEBUG->print("New z value: ", (uint16_t)(z * AM_OUTPUT_SCALE / divider), " mg");
 }
 
 uint8_t AccelerometerModule::clearInterrupt()
@@ -376,48 +378,48 @@ uint8_t AccelerometerModule::clearInterrupt()
 
 uint8_t AccelerometerModule::readVariousRegs()
 {
-	// Serial.print("AM_REG_SYSMOD: ");
-	// Serial.println(readRegisterDebug(AM_REG_SYSMOD) & 0x03, BIN);
-	// Serial.print("AM_PULSE_CFG: ");
-	// Serial.println(readRegisterDebug(AM_PULSE_CFG), BIN);
-	// Serial.print("AM_REG_PL_CFG: ");
-	// Serial.println(readRegisterDebug(AM_REG_PL_CFG), BIN);
-	// Serial.print("AM_REG_FF_MT_CFG: ");
-	// Serial.println(readRegisterDebug(AM_REG_FF_MT_CFG), BIN);
-	// Serial.print("AM_REG_CTRL_REG1: ");
-	// Serial.println(readRegisterDebug(AM_REG_CTRL_REG1), BIN);
-	// Serial.print("AM_REG_CTRL_REG2: ");
-	// Serial.println(readRegisterDebug(AM_REG_CTRL_REG2), BIN);
-	// Serial.print("AM_REG_CTRL_REG3: ");
-	// Serial.println(readRegisterDebug(AM_REG_CTRL_REG3), BIN);
-	// Serial.print("AM_REG_CTRL_REG4: ");
-	// Serial.println(readRegisterDebug(AM_REG_CTRL_REG4), BIN);
-	// Serial.print("AM_REG_CTRL_REG5: ");
-	// Serial.println(readRegisterDebug(AM_REG_CTRL_REG5), BIN);
-	// Serial.print("AM_PULSE_THSX: ");
-	// Serial.println(readRegisterDebug(AM_PULSE_THSX), BIN);
-	// Serial.print("AM_PULSE_THSY: ");
-	// Serial.println(readRegisterDebug(AM_PULSE_THSY), BIN);
-	// Serial.print("AM_PULSE_THSZ: ");
-	// Serial.println(readRegisterDebug(AM_PULSE_THSZ), BIN);
-	// Serial.print("AM_ASLP_COUNT: ");
-	// Serial.println(readRegisterDebug(AM_ASLP_COUNT), BIN);
-	// Serial.print("AM_REG_PL_THS: ");
-	// Serial.println(readRegisterDebug(AM_REG_PL_THS), BIN);
-	// Serial.print("AM_REG_FF_MT_COUNT: ");
-	// Serial.println(readRegisterDebug(AM_REG_FF_MT_COUNT), BIN);
-	// Serial.print("AM_REG_PL_COUNT: ");
-	// Serial.println(readRegisterDebug(AM_REG_PL_COUNT), BIN);
-	// Serial.print("AM_PULSE_LTCY: ");
-	// Serial.println(readRegisterDebug(AM_PULSE_LTCY), BIN);
-	// Serial.print("AM_INT_SOURCE: ");
-	// Serial.println(readRegisterDebug(AM_INT_SOURCE), BIN);
-	// Serial.print("AM_REG_PL_STATUS: ");
-	// Serial.println(readRegisterDebug(AM_REG_PL_STATUS), BIN);
-	// Serial.print("AM_PULSE_SRC: ");
-	// Serial.println(readRegisterDebug(AM_PULSE_SRC), BIN);
-	// Serial.print("AM_REG_FF_MT_SRC: ");
-	// Serial.println(readRegisterDebug(AM_REG_FF_MT_SRC), BIN);
+	Serial.print("AM_REG_SYSMOD: ");
+	Serial.println(readRegisterDebug(AM_REG_SYSMOD) & 0x03, BIN);
+	Serial.print("AM_PULSE_CFG: ");
+	Serial.println(readRegisterDebug(AM_PULSE_CFG), BIN);
+	Serial.print("AM_REG_PL_CFG: ");
+	Serial.println(readRegisterDebug(AM_REG_PL_CFG), BIN);
+	Serial.print("AM_REG_FF_MT_CFG: ");
+	Serial.println(readRegisterDebug(AM_REG_FF_MT_CFG), BIN);
+	Serial.print("AM_REG_CTRL_REG1: ");
+	Serial.println(readRegisterDebug(AM_REG_CTRL_REG1), BIN);
+	Serial.print("AM_REG_CTRL_REG2: ");
+	Serial.println(readRegisterDebug(AM_REG_CTRL_REG2), BIN);
+	Serial.print("AM_REG_CTRL_REG3: ");
+	Serial.println(readRegisterDebug(AM_REG_CTRL_REG3), BIN);
+	Serial.print("AM_REG_CTRL_REG4: ");
+	Serial.println(readRegisterDebug(AM_REG_CTRL_REG4), BIN);
+	Serial.print("AM_REG_CTRL_REG5: ");
+	Serial.println(readRegisterDebug(AM_REG_CTRL_REG5), BIN);
+	Serial.print("AM_PULSE_THSX: ");
+	Serial.println(readRegisterDebug(AM_PULSE_THSX), BIN);
+	Serial.print("AM_PULSE_THSY: ");
+	Serial.println(readRegisterDebug(AM_PULSE_THSY), BIN);
+	Serial.print("AM_PULSE_THSZ: ");
+	Serial.println(readRegisterDebug(AM_PULSE_THSZ), BIN);
+	Serial.print("AM_ASLP_COUNT: ");
+	Serial.println(readRegisterDebug(AM_ASLP_COUNT), BIN);
+	Serial.print("AM_REG_PL_THS: ");
+	Serial.println(readRegisterDebug(AM_REG_PL_THS), BIN);
+	Serial.print("AM_REG_FF_MT_COUNT: ");
+	Serial.println(readRegisterDebug(AM_REG_FF_MT_COUNT), BIN);
+	Serial.print("AM_REG_PL_COUNT: ");
+	Serial.println(readRegisterDebug(AM_REG_PL_COUNT), BIN);
+	Serial.print("AM_PULSE_LTCY: ");
+	Serial.println(readRegisterDebug(AM_PULSE_LTCY), BIN);
+	Serial.print("AM_INT_SOURCE: ");
+	Serial.println(readRegisterDebug(AM_INT_SOURCE), BIN);
+	Serial.print("AM_REG_PL_STATUS: ");
+	Serial.println(readRegisterDebug(AM_REG_PL_STATUS), BIN);
+	Serial.print("AM_PULSE_SRC: ");
+	Serial.println(readRegisterDebug(AM_PULSE_SRC), BIN);
+	Serial.print("AM_REG_FF_MT_SRC: ");
+	Serial.println(readRegisterDebug(AM_REG_FF_MT_SRC), BIN);
 	return SUCCESS;
 }
 

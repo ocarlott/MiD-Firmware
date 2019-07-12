@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "Constant.h"
-#include <SoftwareSerial.h>
 
 #define DEFAULT_DEBUG_VALUE 87
 
@@ -135,9 +134,9 @@ class Debug
 		{
 			Serial.flush();
 			// wait for transmit buffer to empty
-//			while ((UCSR0A & _BV(TXC0)) == 0)
-//				;
-      delay(100);
+			//			while ((UCSR0A & _BV(TXC0)) == 0)
+			//				;
+			delay(100);
 		}
 	}
 };
