@@ -24,7 +24,7 @@ class BluetoothModule
 	BLECharacteristic *alertData;
 	BLEService *bleConfig;
 	BLECharacteristic *configData;
-  static int8_t rssi[10];
+  static int8_t rssi[SAMPLE_SIZE];
   static uint8_t rssiIndex;
 
   public:

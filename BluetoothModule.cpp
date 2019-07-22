@@ -10,7 +10,7 @@ class Lock *BluetoothModule::lock;
 
 uint8_t BluetoothModule::rssiIndex;
 
-int8_t BluetoothModule::rssi[10];
+int8_t BluetoothModule::rssi[SAMPLE_SIZE];
 
 BluetoothModule::BluetoothModule()
 {
@@ -27,7 +27,7 @@ BluetoothModule::BluetoothModule()
 	this->bleConfig = new BLEService(0x9e124dde2782417388af53ff143fef1);
 	this->configData = new BLECharacteristic(0x9e124dde2782417388af53ff143fef2);
   BluetoothModule::rssiIndex = 0;
-  for (uint8_t i = 0; i < 10; i++)
+  for (uint8_t i = 0; i < SAMPLE_SIZE; i++)
   {
     BluetoothModule::rssi[i] = CUT_OFF_THRESHOLD;
   }
@@ -39,7 +39,8 @@ uint8_t BluetoothModule::setup(class Storage *s, class Lock *l)
 	BluetoothModule::storage = s;
   BluetoothModule::lock = l;
 	this->bluefruit->autoConnLed(false);
-	this->bluefruit->begin(3, 0);
+  this->bluefruit->Advertising.addService(*this->bleAuth);
+	this->bluefruit->begin(MAX_PRPH_CONNECTION, 0);
 	this->bluefruit->setTxPower(this->txPower);
 	this->bluefruit->setName(this->name);
 	this->bluefruit->Periph.setConnectCallback(BluetoothModule::connectedCallback);
@@ -51,27 +52,28 @@ uint8_t BluetoothModule::setup(class Storage *s, class Lock *l)
 uint8_t BluetoothModule::configureServices()
 {
 	this->bledis->setManufacturer("MiD");
+  this->bledis->setSoftwareRev("1.0.0");
 	this->bledis->setModel("V1");
 	this->bledis->begin();
 	this->blebas->begin();
 	this->blebas->write(100);
 	this->bleAlert->begin();
 	this->alertData->setProperties(CHR_PROPS_NOTIFY);
-	this->alertData->setPermission(SECMODE_SIGNED_WITH_MITM, SECMODE_NO_ACCESS);
+	this->alertData->setPermission(SECMODE_ENC_NO_MITM, SECMODE_NO_ACCESS);
 	// B0: b7-5 - Module, b4-0 - Status. B1: b7-4 - User, b3-0 - Action.
 	this->alertData->setFixedLen(2);
 	this->alertData->begin();
 	this->bleAuth->begin();
-	this->pass->setProperties(CHR_PROPS_WRITE);
-	this->pass->setPermission(SECMODE_NO_ACCESS, SECMODE_OPEN);
+	this->pass->setProperties(CHR_PROPS_WRITE_WO_RESP | CHR_PROPS_NOTIFY);
+	this->pass->setPermission(SECMODE_NO_ACCESS, SECMODE_ENC_NO_MITM);
 	this->pass->setFixedLen(15);
 	this->pass->setWriteCallback(BluetoothModule::handleAuth);
 	this->pass->begin();
 	this->bleConfig->begin();
-	this->configData->setProperties(CHR_PROPS_WRITE);
-	this->configData->setPermission(SECMODE_NO_ACCESS, SECMODE_SIGNED_WITH_MITM);
-	// B0: b7-5 - Module, b4-0 - Action. B1: Value
-	this->configData->setFixedLen(2);
+	this->configData->setProperties(CHR_PROPS_WRITE_WO_RESP | CHR_PROPS_NOTIFY);
+	this->configData->setPermission(SECMODE_NO_ACCESS, SECMODE_ENC_NO_MITM);
+	// B0: b7-5 - Module, b4-0 - Action. B1-4: Value
+	this->configData->setFixedLen(5);
 	this->configData->begin();
 }
 
@@ -108,7 +110,7 @@ void BluetoothModule::connectedCallback(uint16_t conn_handle)
 
 	char central_name[32] = {0};
 	connection->getPeerName(central_name, sizeof(central_name));
-  connection->monitorRssi(2);
+  connection->monitorRssi(1);
 
 	Serial.print("Connected to ");
 	Serial.println(central_name);
@@ -150,20 +152,29 @@ void BluetoothModule::handleAuth(uint16_t conn_hdl, BLECharacteristic *chr, uint
 		{
 			if (BluetoothModule::storage->checkBlueCode(data))
 			{
-				if (connection->requestPairing()) // 4D 69 44 00 00 00 00 00 00 00 00 00 00 00 00
+				if (connection->bond()) // 4D 69 44 00 00 00 00 00 00 00 00 00 00 00 00
 				{
-					Serial.println("Paired!");
+					chr->notify8(0);
 				}
 				else
 				{
+          chr->notify8(1);
 					Serial.println("Not Paired!");
 				}
 				BluetoothModule::bondingEnabled = false;
 			}
+      else
+      {
+        Serial.println("Passcode is not correct!");
+        chr->notify8(2);
+        connection->disconnect();
+      }
 		}
 		else
 		{
+      chr->notify8(2);
 			Serial.println("Passcode is not correct!");
+      connection->disconnect();
 		}
 	}
 }
@@ -171,17 +182,18 @@ void BluetoothModule::handleAuth(uint16_t conn_hdl, BLECharacteristic *chr, uint
 void BluetoothModule::rssiChanged(uint16_t conn_hdl, int8_t rssi)
 {
   BluetoothModule::rssi[BluetoothModule::rssiIndex++] = rssi;
-  if (BluetoothModule::rssiIndex == 10)
+  if (BluetoothModule::rssiIndex == SAMPLE_SIZE)
   {
     BluetoothModule::rssiIndex = 0;
   }
-  int8_t total = 0;
-  for (uint8_t i = 0; i < 10; i++)
+  int16_t total = 0;
+  for (uint8_t i = 0; i < SAMPLE_SIZE; i++)
   {
     total += BluetoothModule::rssi[i];
   }
-  total = total / 10;
-  if (CUT_OFF_THRESHOLD - total > 4)
+  total = total / SAMPLE_SIZE;
+  int16_t diff = CUT_OFF_THRESHOLD - total;
+  if (diff > 2)
   {
     BLEConnection *connection = Bluefruit.Connection(conn_hdl);
     connection->stopRssi();

@@ -33,9 +33,9 @@ class AccelerometerModule : public WiredDevice
 	uint8_t setAxisForKnockDetection(bool x = true, bool y = true, bool z = true);
 	uint8_t setThresholdForMotionDetection(uint8_t threshold); // 0 - 100 (coresponding for 0 to 4g)
 	uint8_t setAxisForMotionDetection(bool x = true, bool y = true, bool z = true);
-	uint8_t setTimeLimitForKnockDetection(uint8_t time = 160);	// Max 5.1s
-	uint8_t setTimeWindowForSecondKnock(uint8_t time = 2400);	 // Max 10.2s
-	uint8_t setLatencyTimeForKnockDetection(uint8_t time = 2000); // Max 10.2s
+	uint8_t setTimeLimitForKnockDetection(uint8_t time = 200);	// Max 5.1s
+	uint8_t setTimeWindowForSecondKnock(uint8_t time = 5000);	 // Max 10.2s
+	uint8_t setLatencyTimeForKnockDetection(uint8_t time = 400); // Max 10.2s
 	uint8_t enableLandscapeChangeDetection();
 	uint8_t enableKnockDetection();
 	uint8_t enableMotionDetection();

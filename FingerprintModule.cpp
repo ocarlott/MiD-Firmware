@@ -20,7 +20,7 @@ uint8_t FingerprintModule::setup()
 	pinMode(PIN_FINGERPRINT_YELLOW, INPUT);
 	this->reader = new AdafruitFingerprint(&Serial1);
 	this->reader->begin(57600);
-	uint8_t counter = 5;
+	uint8_t counter = 3;
 	bool available;
 	do
 	{

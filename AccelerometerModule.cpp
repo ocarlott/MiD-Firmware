@@ -53,9 +53,9 @@ uint8_t AccelerometerModule::setup(uint8_t addr)
 	readRegister(AM_INT_SOURCE);
 	// Restore to active mode
 	putDeviceInActiveMode;
-	setThresholdForMotionDetection(25);
+	setThresholdForMotionDetection(20);
 	setAxisForMotionDetection(true, true, false);
-	setThresholdForKnockDetection(1, 1, 1);
+	setThresholdForKnockDetection(5, 5, 5);
 	setTimeLimitForKnockDetection();
 	setLatencyTimeForKnockDetection();
 	setAxisForKnockDetection();
@@ -243,7 +243,6 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 		readRegister(AM_REG_FF_MT_SRC, &motion);
 		uint8_t mode;
 		readRegister(AM_REG_SYSMOD, &mode);
-		DEBUG.print("System current mode: ", mode);
 		if (source & 0x10)
 		{
 			if (pl & 0x80)
@@ -254,6 +253,10 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 					NOTIFIER.alertWarning("Landscape change detected!");
 					lastAlertTime = time;
 				}
+        else
+       {
+          DEBUG.println("Landscape change detected!");
+       }
 				if (origin != NULL)
 				{
 					*origin = AM_PL_INT;
@@ -292,6 +295,10 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 					*origin = AM_KNOCK_INT;
 				}
 			}
+     else
+     {
+        DEBUG.println("Knock detected!");
+     }
 		}
 		else if (source & 0x04)
 		{
@@ -325,6 +332,10 @@ uint8_t AccelerometerModule::handleInterrupt(uint8_t *origin)
 					*origin = AM_MOTION_INT;
 				}
 			}
+     else
+     {
+        DEBUG.println("Motion detected!");
+     }
 		}
 		else if (source & 0x80)
 		{

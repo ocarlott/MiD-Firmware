@@ -55,6 +55,7 @@ void setup()
 	am.setup();
 	fpm.setup();
 	kpm.setup();
+  Serial.println("Here again!");
 	sm.setup();
 	lock.addEventListener(callbackOnOpened, callbackOnClosed);
 	//	NRF_NFCT->TASKS_DISABLE = 1;
@@ -74,7 +75,7 @@ void loop()
 	if (am.isReady())
 	{
 		am.handleInterrupt();
-		am.printNewData();
+//		am.printNewData();
 		am.clearInterrupt();
 	};
 
@@ -93,6 +94,7 @@ void loop()
 		sm.run();
 	}
 	//	sd_power_mode_set(NRF_POWER_MODE_LOWPWR);
+// Serial.println("End of loop!");
 	__WFI();
 	waitForEvent();
 }

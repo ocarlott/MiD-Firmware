@@ -18,10 +18,11 @@ KeypadModule::KeypadModule(class Storage *s, class Lock *l) : storage(s), lock(l
 
 uint8_t KeypadModule::setup()
 {
-	Wire.begin();
+//	Wire.begin();
 	writeRegister(KP_ELE_CFG, 0x00);
 	writeRegister(KP_RES_CF, 0X63);
 	delay(10);
+  Serial.print("Here!");
 	// Section A
 	// This group controls filtering when data is > baseline.
 	writeRegister(KP_MHD_R, 0x01);
@@ -74,7 +75,6 @@ uint8_t KeypadModule::setup()
 	// Enable 6 Electrodes and set to run mode
 	// Set KP_ELE_CFG to 0x00 to return to standby mode
 	writeRegister(KP_ELE_CFG, 0x8C); // Enables all 12 Electrodes
-
 	//	CL
 	//	KP_ELEPROX
 	//	KP_ELE:
@@ -175,60 +175,8 @@ uint8_t KeypadModule::handleKey()
       }
       this->lastTime = currentTime;
     }
-    DEBUG.println("Get here!");
+    this->getKey(&key);
     this->enable();
-//	if (this->enabled)
-//	{
-//		this->disable();
-//		uint8_t key;
-//		this->getKey(&key);
-//		if (key != NO_KEY)
-//		{
-//			DEBUG.print("Current key: ", key);
-//			unsigned long currentTime = millis();
-//			switch (key)
-//			{
-//			case KEY_STAR:
-//				if (!this->lock->isOpened())
-//        {
-//          this->currentIndex = 0;
-//        }
-//				break;
-//			case KEY_POUND:
-//				if (this->lock->isOpened())
-//				{
-//					this->lock->lock();
-//				}
-//				else
-//				{
-//					uint32_t passcode;
-//					this->getComputedPasscode(&passcode);
-//					this->lock->openIfTrue(this->storage->checkPasscode(passcode));
-//				}
-//				this->currentIndex = 0;
-//				break;
-//			default:
-//        if (!this->lock->isOpened())
-//        {
-//  				if ((currentTime - this->lastTime <= MAX_DELAY_TIME_BETWEEN_KEYS))
-//  				{
-//  					if (this->currentIndex < PASSCODE_LENGTH)
-//  					{
-//  						this->passcode[this->currentIndex++] = key;
-//  					}
-//  				}
-//  				else
-//  				{
-//  					this->currentIndex = 0;
-//  					this->passcode[this->currentIndex++] = key;
-//  				}
-//        }
-//				break;
-//			}
-//			this->lastTime = currentTime;
-//		}
-//		this->enable();
-//	}
 	KeypadModule::ready = false;
 	return SUCCESS;
 }
