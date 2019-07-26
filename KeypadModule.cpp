@@ -194,7 +194,7 @@ uint8_t KeypadModule::getComputedPasscode(uint32_t *passcode)
 
 uint8_t KeypadModule::getKey(uint8_t *key)
 {
-	Wire.requestFrom((uint8_t)KP_ADDR, (uint8_t)2);
+	Wire.requestFrom((uint8_t)this->addr, (uint8_t)2);
 	uint8_t a, b;
 	uint16_t status = 0;
 	if (Wire.available() >= 2) // slave may send less than requested

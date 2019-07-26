@@ -125,7 +125,7 @@
 #define AM_DATA_READY_INT_BIT 0x01
 
 // Keypad constants
-#define KP_ADDR 0x5B
+#define KP_ADDR 0x5A
 
 // Register Defines
 #define KP_E0BV 0x1E
