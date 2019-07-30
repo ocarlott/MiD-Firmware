@@ -46,6 +46,14 @@ void callbackOnOpened(void)
 	am.disable();
 }
 
+extern "C"
+{
+  void SysTick_Handler(void)
+  {
+    sm.checkFrontSwitch();
+  }
+}
+
 void setup()
 {
 	Serial.begin(SERIAL_FREQ);
@@ -55,7 +63,6 @@ void setup()
 	am.setup();
 	fpm.setup();
 	kpm.setup();
-  Serial.println("Here again!");
 	sm.setup();
 	lock.addEventListener(callbackOnOpened, callbackOnClosed);
 	//	NRF_NFCT->TASKS_DISABLE = 1;
@@ -65,6 +72,7 @@ void setup()
 	uint8_t data[15] = {77, 105, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	ble.setup(&storage, &lock);
 	ble.configureServices();
+  SysTick_Config( (F_CPU/1000)*TICK_INTERVAL_MS );
 	Serial.println("Done setup!");
 }
 
@@ -97,4 +105,5 @@ void loop()
 // Serial.println("End of loop!");
 	__WFI();
 	waitForEvent();
+ sd_app_evt_wait();
 }

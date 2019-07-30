@@ -22,7 +22,6 @@ uint8_t KeypadModule::setup()
 	writeRegister(KP_ELE_CFG, 0x00);
 	writeRegister(KP_RES_CF, 0X63);
 	delay(10);
-  Serial.print("Here!");
 	// Section A
 	// This group controls filtering when data is > baseline.
 	writeRegister(KP_MHD_R, 0x01);

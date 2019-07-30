@@ -22,6 +22,7 @@ class SwitchModule
 	uint8_t disableBackButton();
 	uint8_t enableBluetoothButton();
 	uint8_t disableBluetoothButton();
+  uint8_t checkFrontSwitch();
 
   private:
 	uint8_t frontSwitchEventHandler();

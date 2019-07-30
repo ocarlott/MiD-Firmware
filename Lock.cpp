@@ -50,6 +50,13 @@ uint8_t Lock::openWithKey()
 	return SUCCESS;
 };
 
+uint8_t Lock::closeWithKey()
+{
+  this->isLocked = true;
+  this->closeCallback();
+  return SUCCESS;
+};
+
 uint8_t Lock::addEventListener(callback_t oC, callback_t cC)
 {
 	this->openCallback = oC;

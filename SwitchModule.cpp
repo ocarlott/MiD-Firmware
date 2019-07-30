@@ -16,7 +16,7 @@ uint8_t SwitchModule::setup()
 	pinMode(PIN_BACK_BUTTON, INPUT_PULLUP);
 	pinMode(PIN_FRONT_SWITCH, INPUT_PULLUP);
 	pinMode(PIN_BLUETOOTH_BUTTON, INPUT_PULLUP);
-	enableFrontSwitch();
+//	enableFrontSwitch();
 	enableBackButton();
 	enableBluetoothButton();
 	return SUCCESS;
@@ -43,6 +43,19 @@ uint8_t SwitchModule::run()
 	}
 }
 
+uint8_t SwitchModule::checkFrontSwitch()
+{
+  uint8_t state = digitalRead(PIN_FRONT_SWITCH);
+  if (state == LOW && lock->isOpened())
+  {
+    lock->openWithKey();
+  }
+  else if (state == HIGH && !lock->isOpened())
+  {
+    lock->closeWithKey();
+  }
+}
+
 void SwitchModule::frontSwitchISR()
 {
 	SwitchModule::frontSwitchTriggered = true;
@@ -62,15 +75,23 @@ uint8_t SwitchModule::frontSwitchEventHandler()
 {
 	DEBUG.println("Handling front switch trigger!");
 	disableFrontSwitch();
-	lock->openWithKey();
-	SwitchModule::frontSwitchTriggered = false;
+	if (digitalRead(PIN_FRONT_SWITCH) == LOW)
+  {
+    lock->openWithKey();
+    SwitchModule::frontSwitchTriggered = false;
+  }
+  else
+  {
+    lock->closeWithKey();
+    SwitchModule::frontSwitchTriggered = false;
+  }
 	enableFrontSwitch();
 	return SUCCESS;
 }
 
 uint8_t SwitchModule::enableFrontSwitch()
 {
-	attachInterrupt(PIN_FRONT_SWITCH, SwitchModule::frontSwitchISR, ISR_DEFERRED | FALLING);
+	attachInterrupt(PIN_FRONT_SWITCH, SwitchModule::frontSwitchISR, ISR_DEFERRED | CHANGE);
 	return SUCCESS;
 }
 
