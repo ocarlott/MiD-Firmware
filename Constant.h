@@ -43,7 +43,7 @@
 * Accelerometer Module constants
 */
 // Addresses
-#define AM_DEFAULT_ADDRESS (0x1C) // if A is GND, its 0x1C
+#define AM_DEFAULT_ADDRESS (0x1D) // if A is GND, its 0x1C
 #define AM_REG_OUT_X_MSB 0x01
 #define AM_REG_OUT_X_LSB 0x02
 #define AM_REG_OUT_Y_MSB 0X03

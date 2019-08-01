@@ -10,7 +10,7 @@ uint8_t MotorModule::turnToOpenPosition()
 	DEBUG.println("Turn motor to opened position!");
 //	this->turnTo(110);
   this->motor->attach(PIN_MOTOR);
-  for (uint8_t i = 0; i < 100; i += 1)
+  for (uint8_t i = 0; i < 112; i += 1)
   {
     this->motor->write(i);
     delay(15);
@@ -24,7 +24,7 @@ uint8_t MotorModule::turnToClosePosition()
 	DEBUG.println("Turn motor to closed position");
 //	this->turnTo(0);
   this->motor->attach(PIN_MOTOR);
-  for (uint8_t i = 100; i > 0; i -= 1)
+  for (uint8_t i = 112; i > 0; i -= 1)
   {
     this->motor->write(i);
     delay(15);

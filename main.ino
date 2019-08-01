@@ -46,17 +46,18 @@ void callbackOnOpened(void)
 	am.disable();
 }
 
-extern "C"
-{
-  void SysTick_Handler(void)
-  {
-    sm.checkFrontSwitch();
-  }
-}
+//extern "C"
+//{
+//  void SysTick_Handler(void)
+//  {
+//    sm.checkFrontSwitch();
+//  }
+//}
 
 void setup()
 {
 	Serial.begin(SERIAL_FREQ);
+  Serial.println("Start");
 	DEBUG.enable();
 	NOTIFIER.setup();
 	storage.setup();
@@ -72,7 +73,7 @@ void setup()
 	uint8_t data[15] = {77, 105, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	ble.setup(&storage, &lock);
 	ble.configureServices();
-  SysTick_Config( (F_CPU/1000)*TICK_INTERVAL_MS );
+//  SysTick_Config( (F_CPU/1000)*TICK_INTERVAL_MS );
 	Serial.println("Done setup!");
 }
 
